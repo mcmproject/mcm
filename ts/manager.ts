@@ -8,7 +8,10 @@ if (!localStorage.getItem("mcm")) {
     let mcm = {
         "likes": [],
         "favorites": [],
-        "settings": []
+        "settings": {
+            "like_tracking": true,
+            "favorite_tracking": true
+        }
     }
     localStorage.setItem("mcm", JSON.stringify(mcm));
 }
@@ -89,8 +92,7 @@ class MCM {
             if (like.isValid()) {
                 let mcm = JSON.parse(localStorage.getItem("mcm"));
                 mcm["likes"].push(like.export());
-                mcm = JSON.stringify(mcm);
-                localStorage.setItem("mcm", mcm);
+                localStorage.setItem("mcm", JSON.stringify(mcm));
             } else {
                 ErrorNotification.invalidLike();
             }
@@ -104,14 +106,28 @@ class MCM {
             if (favorite.isValid()) {
                 let mcm = JSON.parse(localStorage.getItem("mcm"));
                 mcm["favorites"].push(favorite.export());
-                mcm = JSON.stringify(mcm);
-                localStorage.setItem("mcm", mcm);
+                localStorage.setItem("mcm", JSON.stringify(mcm));
             } else {
                 ErrorNotification.invalidFavorite();
             }
         } else {
             ErrorNotification.notFavorite();
         }
+    }
+
+    static removeFavorite(id: string) {
+        let mcm = JSON.parse(localStorage.getItem("mcm"));
+        mcm["favorites"] = mcm["favorites"].filter(function(favorite) {
+            return favorite["id"] !== id;
+        });
+        localStorage.setItem("mcm", mcm);
+    }
+
+    static hasFavoriteWithId(id: string) {
+        let mcm = JSON.parse(localStorage.getItem("mcm"));
+        return mcm["favorites"].filter(function(favorite) {
+            return favorite["id"] === id;
+        }).length;
     }
 }
 
@@ -135,28 +151,73 @@ class ErrorNotification {
 
 document.addEventListener("DOMContentLoaded", function () {
     let url = window.location.href;
+    let mcm = JSON.parse(localStorage.getItem("mcm"));
+    let like_tracking_set = mcm["settings"]["like_tracking"];
+    let favorite_tracking_set = mcm["settings"]["favorite_tracking"];
 
     if (url.slice(0, 18) === "https://www.mycity") {
-        if (document.getElementsByClassName("lajk").length) {
-            let likes = document.getElementsByClassName("lajk");
+        if (like_tracking_set) {
+            if (document.getElementsByClassName("lajk").length) {
+                let likes = document.getElementsByClassName("lajk");
 
-            for (let i = 0; i < likes.length; i++) {
-                likes[i].addEventListener("click", function() {
-                    let href = this.getAttribute("href");
-                    let id   = href.split(",")[1].slice(1, href.split(",")[1].length - 1);
-                    let link = url.split("#").length == 2 ? url : url + "#p" + id;
-                    let author = document.getElementById("tabela_poruke_"+id)
-                                 .getElementsByClassName("profile")[0].getAttribute("href")
-                                 .split("/")[4];
-                    
-                    let datetime = new Date();
-                    let time = datetime.getHours() + ":" + datetime.getMinutes();
-                    let date = datetime.getDate() + "." + datetime.getMonth() + "." + datetime.getFullYear() + ".";
-                    
-                    let like = new Like();
-                    like.setId(id).setAuthor(author).setLink(link).setTime(time).setDate(date);
-                    MCM.addLike(like);
-                });
+                for (let i = 0; i < likes.length; i++) {
+                    likes[i].addEventListener("click", function() {
+                        let href = this.getAttribute("href");
+                        let id   = href.split(",")[1].slice(1, href.split(",")[1].length - 1);
+                        let link = url.split("#").length == 2 ? url : url + "#p" + id;
+                        let author = document.getElementById("tabela_poruke_"+id)
+                                    .getElementsByClassName("profile")[0].getAttribute("href")
+                                    .split("/")[4];
+                        
+                        let datetime = new Date();
+                        let time = datetime.getHours() + ":" + datetime.getMinutes();
+                        let date = datetime.getDate() + "." + datetime.getMonth() + "." + datetime.getFullYear() + ".";
+                        
+                        let like = new Like();
+                        like.setId(id).setAuthor(author).setLink(link).setTime(time).setDate(date);
+                        MCM.addLike(like);
+                    });
+                }
+            }
+        }
+
+        if (favorite_tracking_set) {
+            if (document.getElementsByClassName("post-controls").length) {
+                let posts = document.getElementsByClassName("post-controls");
+
+                for (let i = 0; i < posts.length; i++) {
+                    let id = posts[i].parentElement.parentElement.parentElement
+                             .childNodes[1].attributes["id"].nodeValue.slice(17);
+                    let li = document.createElement("li");
+                    let a = document.createElement("a");
+                    a.setAttribute("class", "mcm-favorite");
+                    a.setAttribute("id", "favorite"+id);
+                    let text = null;
+                    if (MCM.hasFavoriteWithId(id)) {
+                        text = document.createTextNode("Dodaj u omiljene");
+                    } else {
+                        text = document.createTextNode("Ukloni iz omiljenih");
+                    }
+
+                    a.appendChild(text);
+                    li.appendChild(a);
+                    li.addEventListener("click", function() {
+                        let link = url.split("#").length == 2 ? url : url + "#p" + id;
+                        let author = document.getElementById("tabela_poruke_"+id)
+                                     .getElementsByClassName("profile")[0].getAttribute("href")
+                                     .split("/")[4];
+
+                        let datetime = new Date();
+                        let time = datetime.getHours() + ":" + datetime.getMinutes();
+                        let date = datetime.getDate() + "." + datetime.getMonth() + "." + datetime.getFullYear() + ".";
+
+                        let favorite = new Favorite();
+                        favorite.setId(id).setAuthor(author).setLink(link).setTime(time).setDate(date);
+                        MCM.addFavorite(favorite);
+                    });
+
+                    posts[i].childNodes[1].appendChild(li);
+                }
             }
         }
     }
