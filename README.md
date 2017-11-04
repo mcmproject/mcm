@@ -8,6 +8,8 @@ MyCity Manager proširenje za MyCity i MyCity Military.
 
 - Čuvanje lajkovanih postova
 - Čuvanje omiljenih postova
+- Uvoz i izvoz informacija
+- Automatsko ažuriranje
 
 ## Lokalno skladište
 

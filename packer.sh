@@ -61,3 +61,31 @@ elif [ $1 = "chrome" ] || [ $1 = "ch" ]; then
         fi
     fi
 fi
+
+# Opera
+elif [ $1 = "opera" ] || [ $1 = "o" ]; then
+    if [ -d "../mcmo/" ]; then
+        cp -rf . ../mcmo
+        if [ $0 -ne 0 ]; then
+            echo "Došlo je do greške pri kopiranju sadržaja u direktorijum 'mcmo'."
+        else
+            cd ../mcmo
+            rm -rf node_modules && rm -rf ts && rm packer.bat && rm packer.sh && rm .gitignore && rm README.md && rm package.json
+            cd ../mcm
+        fi
+    else
+        mkdir -p ../mcmo
+        if [ $0 -ne 0 ]; then
+            echo "Došlo je do greške pri kreiranju direktorijuma 'mcmo'."
+        else
+            cp -rf . ../mcmo
+            if [ $0 -ne 0 ]; then
+                echo "Došlo je do greške pri kopiranju sadržaja u direktorijum 'mcmo'."
+            else
+                cd ../mcmo
+                rm -rf node_modules && rm -rf ts && rm packer.bat && rm packer.sh && rm .gitignore && rm README.md && rm package.json
+                cd ../mcm
+            fi
+        fi
+    fi
+fi
