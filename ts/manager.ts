@@ -8,11 +8,6 @@ const buildDate = "05.11.2017.";
 
 let storage = chrome.storage.local;
 
-storage.get("mcm-likes", (result) => {
-    let likes = result["mcm-likes"];
-    console.log(likes);
-});
-
 class MCM {
     static addLike(like: Like) {
         if (like instanceof Like) {
@@ -22,7 +17,7 @@ class MCM {
                     likes.push(like.export());
                     storage.set({"mcm-likes": likes}, () => {
                         if (chrome.runtime.lastError) {
-                            ErrorNotification.errorOnAddingLike();
+                            ErrorNotification.errorOnAddingLike(chrome.runtime.lastError);
                         }
                     });
                 });
@@ -116,8 +111,9 @@ class DateTime {
 }
 
 class ErrorNotification {
-    static extensionInitError() {
+    static extensionInitError(error) {
         alert("Upsss, došlo je do greške pri podešavanju proširenja!");
+        console.log(error);
         throw new Error("Došlo je do greške pri podešavanju proširenja.");
     }
 
@@ -129,8 +125,9 @@ class ErrorNotification {
         throw new Error("Poslati parametar nije validan 'Like' objekat.");
     }
 
-    static errorOnAddingLike() {
+    static errorOnAddingLike(error) {
         alert("Došlo je do greške pri dodavanju lajka!");
+        console.log(error);
         throw new Error("Došlo je do greške pri dodavanju lajka.");
     }
 }
@@ -138,7 +135,7 @@ class ErrorNotification {
 document.addEventListener("DOMContentLoaded", () => {
     let url = window.location.href;
 
-    if (url.slice(0, 21) === "https://www.mycity.rs" || url.slice(0, 31) === "https://www.mycity-military.com/") {
+    if (url.slice(0, 21) === "https://www.mycity.rs" || url.slice(0, 31) === "https://www.mycity-military.com") {
         storage.get("mcm", (result) => {
             let results = result.mcm;
             if (results === undefined) {
@@ -156,24 +153,21 @@ document.addEventListener("DOMContentLoaded", () => {
         
                 storage.set({"mcm": mcm}, () => {
                     if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError();
-                        console.log(chrome.runtime.lastError);
+                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
                     }
                     console.log("Opšti podaci o proširenju su dodati.");
                 });
         
                 storage.set({"mcm-likes": mcm_likes}, () => {
                     if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError();
-                        console.log(chrome.runtime.lastError);
+                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
                     }
                     console.log("Skladište za praćenje lajkova je dodato.");
                 });
         
                 storage.set({"mcm-settings": mcm_settings}, () => {
                     if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError();
-                        console.log(chrome.runtime.lastError);
+                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
                     }
                     console.log("Podešavanja proširenja su dodata.");
         

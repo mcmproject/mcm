@@ -11,14 +11,6 @@
             <a href='#' id='new' class='btn btn-primary'>
                 <span class='glyphicon glyphicon-file'></span> &nbsp; Nova sesija
             </a>
-            <!--
-            <a href='#' id='load' class='btn btn-primary'>
-                <span class='glyphicon glyphicon-save'></span> &nbsp; Uvoz podataka
-            </a>
-            <a href='#' id='export' class='btn btn-primary'>
-                <span class='glyphicon glyphicon-open'></span> &nbsp; Izvoz podataka
-            </a>
-            -->
             <a href='#' id='informations' class='btn btn-primary right'>
                 <span class='glyphicon glyphicon-info-sign'></span> &nbsp; Informacije
             </a>
@@ -46,24 +38,28 @@
                 <div class="tab-content">
                     <div id="likes" class="tab-pane fade in active">
                         <h3>Sviđanja</h3>
-                        <table id="likes-table" class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Autor</th>
-                                    <th>Link</th>
-                                    <th>Vreme</th>
-                                    <th>Datum</th>
-                                </tr>
-                            </thead>
-                            <tbody id="likes-list">
+                        <div id="table-wrapper">
+                            <table id="likes-table" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Autor</th>
+                                        <th>Link</th>
+                                        <th>Vreme</th>
+                                        <th>Datum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="likes-list">
 
-                            </tbody>
-                        </table>
+                                </tbody>
+                            </table>
+                        </div>
 
                     </div>
                     <div id="settings" class="tab-pane fade">
                         <h3>Podešavanja</h3>
-                        <p>Some content in menu 1.</p>
+                        <p id="settings-list">
+                            <input type="checkbox" id="likes-setting"/> &nbsp; Beleži postove koje lajkujem
+                        </p>
                     </div>
                 </div>
             </div>

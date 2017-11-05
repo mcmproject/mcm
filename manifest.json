@@ -2,7 +2,7 @@
     "manifest_version": 2,
   
     "name": "MyCity Manager",
-    "description": "MyCity Manager proširenje za Google Chrome pregledač i njegove derivate.",
+    "description": "MyCity Manager proširenje za MyCity i MyCity Military forume.",
     "version": "1.0.0",
 
     "content_scripts": [
@@ -13,12 +13,10 @@
         }
     ],
     "background": {
-        "scripts": ["public/js/browser.js"],
-        "persistent": false
+        "scripts": ["public/js/browser.js"]
     },
     "browser_action": {
-      "default_icon": "public/images/icon.png",
-      "title": "MyCity Manager"
+      "default_icon": "public/images/icon.png"
     },
     "icons": {
         "16": "public/images/icon16.png",
@@ -29,6 +27,5 @@
       "tabs",
       "storage",
       "unlimitedStorage"
-    ],
-    "offline_enabled": true
-  }
+    ]
+}

@@ -1,4 +1,4 @@
-let app = (function () {
+let app = (() => {
     let version   = "1.0.0",
         codeName  = "Nikozija",
         buildDate = "05.11.2017.",
@@ -18,7 +18,17 @@ let app = (function () {
     return api;
 })();
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", () => {
+    let like_tracking = (<HTMLInputElement>document.getElementById("likes-setting"));
+    chrome.storage.local.get("mcm-settings", (result) => {
+        let settings = result["mcm-settings"];
+        if (settings["like_tracker"]) {
+            like_tracking.checked = true;
+        } else {
+            like_tracking.checked = false;
+        }
+    });
+
     let likes = null;
     
     chrome.storage.local.get("mcm-likes", (result) => {
@@ -50,11 +60,58 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     });
 
-    document.getElementById("informations").addEventListener("click", function() {
+    document.getElementById("new").addEventListener("click", () => {
+        let choice = confirm("Da li ste sigurni da želite započnete novu sesiju? Ova opcija će " +
+                             "obrisati sve do sada zabeležene podatke.");
+        if (choice) {
+            chrome.storage.local.set({"mcm-likes": []}, () => {
+                if (chrome.runtime.lastError) {
+                    alert("Došlo je do greške pri započinjanju nove sesije!");
+                    console.log(chrome.runtime.lastError);
+                    throw new Error("Došlo je do greške pri započinjanju nove sesije.");
+                }
+            });
+            window.location.reload();
+        }
+    });
+
+    document.getElementById("informations").addEventListener("click", () => {
         alert(
             "Verzija: " + app.getVersion() + "\n" +
             "Kodno ime: " + app.getCodeName() + "\n" +
-            "Datum izgradnje: " + app.getBuildDate() + "\n"
+            "Datum izgradnje: " + app.getBuildDate() + "\n\n" +
+            "Ovo je eksperimentalna verzija proširenja."
         );
+    });
+
+    document.getElementById("likes-setting").addEventListener("click", () => {
+        let setting = (<HTMLInputElement>document.getElementById("likes-setting"));
+        if (!setting.checked) {
+            chrome.storage.local.get("mcm-settings", (result) => {
+                let settings = result["mcm-settings"];
+                settings["like_tracker"] = false;
+                chrome.storage.local.set({"mcm-settings": settings}, () => {
+                    if (chrome.runtime.lastError) {
+                        alert("Došlo je do greške pri promeni podešavanja!");
+                        console.log(chrome.runtime.lastError);
+                        throw new Error("Došlo je do greške pri promeni podešavanja.");
+                    }
+                    console.log("Praćenje lajkova je isključeno.");
+                })
+            });
+        } else {
+            chrome.storage.local.get("mcm-settings", (result) => {
+                let settings = result["mcm-settings"];
+                settings["like_tracker"] = true;
+                chrome.storage.local.set({"mcm-settings": settings}, () => {
+                    if (chrome.runtime.lastError) {
+                        alert("Došlo je do greške pri promeni podešavanja!");
+                        console.log(chrome.runtime.lastError);
+                        throw new Error("Došlo je do greške pri promeni podešavanja.");
+                    }
+                    console.log("Praćenje lajkova je uključeno.");
+                })
+            });
+        }
     });
 });

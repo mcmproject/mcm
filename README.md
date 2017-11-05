@@ -1,6 +1,7 @@
 # MyCity Manager
 
 MyCity Manager proširenje za MyCity i MyCity Military.
+https://mcmproject.github.io
 
 ## Trenutna verzija
 
@@ -8,26 +9,19 @@ MyCity Manager proširenje za MyCity i MyCity Military.
 
 - Čuvanje lajkovanih postova
 - Jedinstven interfejs
-- Uvoz i izvoz informacija
-- Automatsko ažuriranje
+- Podešavanja
+- Brisanje sesija
 
-## Lokalno skladište
+## Prioriteti
 
-Svi podaci proširenja čuvaju se u lokalnom skladištu pregledača [(localStorage)](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) u sledećem formatu (format čuvanja će se delimično menjati sa izlaskom novih verzija proširenja).
+- Očuvanje jedinstvenog interfejsa
+- Očuvanje što sličnije kodne baze između različitih pregledača
+- Stabilnost pre opcija
 
-```json
-{
-    "likes": [
-        {
-            "id": "id_posta",
-            "author": "ime_autora",
-            "link": "link_posta",
-            "time": "vreme_posta",
-            "date": "datum_posta"
-        }
-    ],
-    "settings": {
-        "like_tracker": true
-    }
-}
-```
+## Trenutni zadaci
+
+Ako želite da pomognete pri razvoju proširenja možete to učiniti na sledeće načine:
+
+- Prijava bagova
+- Testiranje proširenja za Microsoft Edge pregledač
+- Novi logo (nije prioritetno)

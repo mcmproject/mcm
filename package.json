@@ -1,7 +1,7 @@
 {
   "name": "mcm",
   "version": "1.0.0",
-  "description": "MyCity Manager proširenje za Google Chrome pregledače i derivate.",
+  "description": "MyCity Manager proširenje za MyCity i MyCity Military forume.",
   "main": "index.html",
   "dependencies": {
     "@types/chrome": "0.0.52",

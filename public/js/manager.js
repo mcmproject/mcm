@@ -4,10 +4,6 @@ var version = "1.0.0";
 var codeName = "Nikozija";
 var buildDate = "05.11.2017.";
 var storage = chrome.storage.local;
-storage.get("mcm-likes", function (result) {
-    var likes = result["mcm-likes"];
-    console.log(likes);
-});
 var MCM = (function () {
     function MCM() {
     }
@@ -19,7 +15,7 @@ var MCM = (function () {
                     likes.push(like["export"]());
                     storage.set({ "mcm-likes": likes }, function () {
                         if (chrome.runtime.lastError) {
-                            ErrorNotification.errorOnAddingLike();
+                            ErrorNotification.errorOnAddingLike(chrome.runtime.lastError);
                         }
                     });
                 });
@@ -108,8 +104,9 @@ var DateTime = (function () {
 var ErrorNotification = (function () {
     function ErrorNotification() {
     }
-    ErrorNotification.extensionInitError = function () {
+    ErrorNotification.extensionInitError = function (error) {
         alert("Upsss, došlo je do greške pri podešavanju proširenja!");
+        console.log(error);
         throw new Error("Došlo je do greške pri podešavanju proširenja.");
     };
     ErrorNotification.notLike = function () {
@@ -118,15 +115,16 @@ var ErrorNotification = (function () {
     ErrorNotification.invalidLike = function () {
         throw new Error("Poslati parametar nije validan 'Like' objekat.");
     };
-    ErrorNotification.errorOnAddingLike = function () {
+    ErrorNotification.errorOnAddingLike = function (error) {
         alert("Došlo je do greške pri dodavanju lajka!");
+        console.log(error);
         throw new Error("Došlo je do greške pri dodavanju lajka.");
     };
     return ErrorNotification;
 }());
 document.addEventListener("DOMContentLoaded", function () {
     var url = window.location.href;
-    if (url.slice(0, 21) === "https://www.mycity.rs" || url.slice(0, 31) === "https://www.mycity-military.com/") {
+    if (url.slice(0, 21) === "https://www.mycity.rs" || url.slice(0, 31) === "https://www.mycity-military.com") {
         storage.get("mcm", function (result) {
             var results = result.mcm;
             if (results === undefined) {
@@ -141,22 +139,19 @@ document.addEventListener("DOMContentLoaded", function () {
                 };
                 storage.set({ "mcm": mcm }, function () {
                     if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError();
-                        console.log(chrome.runtime.lastError);
+                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
                     }
                     console.log("Opšti podaci o proširenju su dodati.");
                 });
                 storage.set({ "mcm-likes": mcm_likes }, function () {
                     if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError();
-                        console.log(chrome.runtime.lastError);
+                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
                     }
                     console.log("Skladište za praćenje lajkova je dodato.");
                 });
                 storage.set({ "mcm-settings": mcm_settings }, function () {
                     if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError();
-                        console.log(chrome.runtime.lastError);
+                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
                     }
                     console.log("Podešavanja proširenja su dodata.");
                     alert("Čestitamo, proširenje je uspešno podešeno! " +
