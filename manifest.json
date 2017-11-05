@@ -9,24 +9,25 @@
         {
             "run_at": "document_start",
             "matches": ["https://*/*"],
-            "js": ["js/manager.js"]
+            "js": ["public/js/manager.js"]
         }
     ],
     "background": {
-        "scripts": ["js/browser.js"],
+        "scripts": ["public/js/browser.js"],
         "persistent": false
     },
     "browser_action": {
-      "default_icon": "images/icon.png",
+      "default_icon": "public/images/icon.png",
       "title": "MyCity Manager"
     },
     "icons": {
-        "16": "images/icon16.png",
-        "32": "images/icon32.png",
-        "128": "images/icon128.png"
+        "16": "public/images/icon16.png",
+        "32": "public/images/icon32.png",
+        "128": "public/images/icon128.png"
     },
     "permissions": [
       "tabs",
+      "storage",
       "unlimitedStorage"
     ],
     "offline_enabled": true

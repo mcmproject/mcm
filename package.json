@@ -4,12 +4,15 @@
   "description": "MyCity Manager proširenje za Google Chrome pregledače i derivate.",
   "main": "index.html",
   "dependencies": {
+    "@types/chrome": "0.0.52",
     "jslint": "^0.11.0"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node": "^8.0.47"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tsc": "tsc ts/*.ts --outDir js/"
+    "tsc": "tsc ts/*.ts --outDir public/js/"
   },
   "author": "Nikola S.",
   "license": "MIT"

@@ -1,0 +1,41 @@
+.menu {
+    padding-left: 30px;
+    padding-right: 30px;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.right {
+    float: right;
+}
+
+.panel.noborder {
+    border: none;
+    box-shadow: none;
+}
+.panel.noborder > .panel-heading {
+    border: 1px solid #dddddd;
+    border-radius: 0;
+}
+
+.menu-items {
+    color: #000000;
+}
+
+a {
+    text-decoration: none !important;
+}
+
+a:focus {
+    color: #000000;
+}
+
+.tab-pane {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+
+#likes-table {
+    height: 500px !important;
+    overflow-y: scroll !important;
+}

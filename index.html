@@ -1,41 +1,75 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset='utf-8'>
-    <title>MyCity Manager</title>
-    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
-    <link rel="stylesheet" type="text/css" href="css/styles.css">
-    <script src="js/control-center.js"></script>
-  </head>
-  <body>
-      <div class="row">
-          <div class="col-md-12 text-center">
-                <img id="flag" src="images/flag.png" class="img-responsive">
-          </div>
-          <div class="col-md-12 text-center">
-                <h1>MyCity Manager</h1>
-                <p>
-                    Dobrodošli u MyCity Manager proširenje za Chrome i Chrome bazirane pregledače.
-                </p>
-                <p class="text-justify">
-                    MyCity Manager je proširenje koje bi trebalo da poboljša boravak članova na
-                    MyCity forumima i olakša im operacije koje nisu podrazumevano dostupne preko
-                    forumskog softvera. Dok se administratori bave bitnijim stvarima i obezbeđuju
-                    normalno funkcionisanje našeg virtuelnog grada, MyCity Manager je tu da dodatno
-                    obogati korisničko iskustvo, kako na opštem i tech, tako i na vojnom delu. 
-                    Nadamo se da je ovo dobar početak. Pred vama se nalazi prva eksperimentalna 
-                    verzija, <i>Nikozija</i>. Proširenje je otvorenog koda, tako da će svi 
-                    zainteresovani moći da pomognu pri razvoju. Takođe možete pomoći i tako što 
-                    ćete testirati proširenje u vašem pregledaču i obaveštavati razvojni tim o 
-                    bagovima.
-                </p>
-                <p>Želimo vam prijatno korišćenje.</p>
-                <p><i>Srdačno, razvojni tim.</i></p>
-                <button id="continue" type="button" class="btn btn-primary">
-                    Nastavi
-                </button>
+    <head>
+        <meta charset='utf-8'>
+        <title>MyCity Manager</title>
+        <link rel='stylesheet' type='text/css' href='public/css/bootstrap.min.css'>
+        <link rel='stylesheet' type='text/css' href='public/css/styles.css'>
+    </head>
+    <body>
+        <div class='row menu'>
+            <a href='#' id='new' class='btn btn-primary'>
+                <span class='glyphicon glyphicon-file'></span> &nbsp; Nova sesija
+            </a>
+            <!--
+            <a href='#' id='load' class='btn btn-primary'>
+                <span class='glyphicon glyphicon-save'></span> &nbsp; Uvoz podataka
+            </a>
+            <a href='#' id='export' class='btn btn-primary'>
+                <span class='glyphicon glyphicon-open'></span> &nbsp; Izvoz podataka
+            </a>
+            -->
+            <a href='#' id='informations' class='btn btn-primary right'>
+                <span class='glyphicon glyphicon-info-sign'></span> &nbsp; Informacije
+            </a>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="panel noborder panel-default">
+                    <div class="panel-body side-menu no-padding">
+                        <ul class="list-group full-width">
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#likes" class="menu-items">
+                                    <span class="glyphicon glyphicon-thumbs-up"></span> &nbsp; Sviđanja
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#settings" class="menu-items">
+                                    <span class="glyphicon glyphicon-wrench"></span> &nbsp; Podešavanja
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-      </div>
-    </div>
-  </body>
+            <div class="col-md-9">
+                <div class="tab-content">
+                    <div id="likes" class="tab-pane fade in active">
+                        <h3>Sviđanja</h3>
+                        <table id="likes-table" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Autor</th>
+                                    <th>Link</th>
+                                    <th>Vreme</th>
+                                    <th>Datum</th>
+                                </tr>
+                            </thead>
+                            <tbody id="likes-list">
+
+                            </tbody>
+                        </table>
+
+                    </div>
+                    <div id="settings" class="tab-pane fade">
+                        <h3>Podešavanja</h3>
+                        <p>Some content in menu 1.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src='public/js/jquery.min.js'></script>
+        <script src='public/js/bootstrap.min.js'></script>
+        <script src='public/js/app.js'></script>
+    </body>
 </html>

@@ -7,7 +7,7 @@ MyCity Manager proširenje za MyCity i MyCity Military.
 *1.0.0 Nikozija*
 
 - Čuvanje lajkovanih postova
-- Čuvanje omiljenih postova
+- Jedinstven interfejs
 - Uvoz i izvoz informacija
 - Automatsko ažuriranje
 
@@ -26,18 +26,8 @@ Svi podaci proširenja čuvaju se u lokalnom skladištu pregledača [(localStora
             "date": "datum_posta"
         }
     ],
-    "favorites": [
-        {
-            "id": "id_posta",
-            "author": "ime_autora",
-            "link": "link_posta",
-            "time": "vreme_posta",
-            "date": "datum_posta"
-        }
-    ],
     "settings": {
-        "like_tracker": true,
-        "favorite_tracker": true
+        "like_tracker": true
     }
 }
 ```
