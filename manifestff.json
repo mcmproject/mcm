@@ -30,5 +30,10 @@
       "tabs",
       "storage",
       "unlimitedStorage"
-    ]
+    ],
+    "applications": {
+        "gecko": {
+            "id": "mcmproject@mcmproject.github.io"
+        }
+    }
 }

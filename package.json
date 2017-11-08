@@ -8,7 +8,12 @@
     "jslint": "^0.11.0"
   },
   "devDependencies": {
-    "@types/node": "^8.0.47"
+    "@types/node": "^8.0.47",
+    "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.1",
+    "gulp-sourcemaps": "^2.6.1",
+    "gulp-typescript": "^3.2.3",
+    "gulp-uglify": "^3.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

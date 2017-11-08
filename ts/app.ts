@@ -19,6 +19,10 @@ let app = (() => {
 })();
 
 document.addEventListener("DOMContentLoaded", () => {
+    let escapeHTML = (str) => { 
+        return str.replace(/[&"'<>]/g, (m) => ({ "&": "&amp;", '"': "&quot;", "'": "&#39;", "<": "&lt;", ">": "&gt;" })[m]); 
+    }
+
     let like_tracking = (<HTMLInputElement>document.getElementById("likes-setting"));
     chrome.storage.local.get("mcm-settings", (result) => {
         let settings = result["mcm-settings"];
@@ -44,9 +48,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 let time = document.createElement("td");
                 let date = document.createElement("td");
 
-                author.innerHTML = likes[i]["author"];
-                time.innerHTML = likes[i]["time"];
-                date.innerHTML = likes[i]["date"];
+                author.innerHTML = escapeHTML(likes[i]["author"]);
+                time.innerHTML = escapeHTML(likes[i]["time"]);
+                date.innerHTML = escapeHTML(likes[i]["date"]);
 
                 tr.appendChild(author);
                 a.innerText = likes[i]["link"];

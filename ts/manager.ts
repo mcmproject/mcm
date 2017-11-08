@@ -135,75 +135,73 @@ class ErrorNotification {
 document.addEventListener("DOMContentLoaded", () => {
     let url = window.location.href;
 
-    if (url.slice(0, 21) === "https://www.mycity.rs" || url.slice(0, 31) === "https://www.mycity-military.com") {
-        storage.get("mcm", (result) => {
-            let results = result.mcm;
-            if (results === undefined) {
-                let mcm = {
-                    "version": version,
-                    "codeName": codeName,
-                    "buildDate": buildDate
-                };
+    storage.get("mcm", (result) => {
+        let results = result.mcm;
+        if (results === undefined) {
+            let mcm = {
+                "version": version,
+                "codeName": codeName,
+                "buildDate": buildDate
+            };
         
-                let mcm_likes = [];
+            let mcm_likes = [];
         
-                let mcm_settings = {
-                    "like_tracker": true
-                };
+            let mcm_settings = {
+                "like_tracker": true
+            };
         
-                storage.set({"mcm": mcm}, () => {
-                    if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
-                    }
-                    console.log("Opšti podaci o proširenju su dodati.");
-                });
+            storage.set({"mcm": mcm}, () => {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Opšti podaci o proširenju su dodati.");
+            });
         
-                storage.set({"mcm-likes": mcm_likes}, () => {
-                    if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
-                    }
-                    console.log("Skladište za praćenje lajkova je dodato.");
-                });
+            storage.set({"mcm-likes": mcm_likes}, () => {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Skladište za praćenje lajkova je dodato.");
+            });
         
-                storage.set({"mcm-settings": mcm_settings}, () => {
-                    if (chrome.runtime.lastError) {
-                        ErrorNotification.extensionInitError(chrome.runtime.lastError);
-                    }
-                    console.log("Podešavanja proširenja su dodata.");
+            storage.set({"mcm-settings": mcm_settings}, () => {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Podešavanja proširenja su dodata.");
         
-                    alert("Čestitamo, proširenje je uspešno podešeno! " +
-                          "Za pristup podešavanjima i ostalim opcijama " +
-                          "proširenja kliknite na ikonicu proširenja " +
-                          "koja se nalazi pored polja za kucanje URL-a.");
-                });
-            }
-        });
-
-        storage.get("mcm-settings", (result) => {
-            let like_tracker = result["mcm-settings"]["like_tracker"];
-            if (like_tracker) {
-                if (document.getElementsByClassName("lajk").length) {
-                    let likes = document.getElementsByClassName("lajk");
-    
-                    for (let i = 0; i < likes.length; i++) {
-                        likes[i].addEventListener("click", () => {
-                            let href = likes[i].getAttribute("href");
-                            let id   = href.split(",")[1].slice(1, href.split(",")[1].length - 1);
-                            let link = url.split("#").length == 2 ? url : url + "#p" + id;
-                            let author = document.getElementById("tabela_poruke_"+id)
-                                        .getElementsByClassName("profile")[0].getAttribute("href")
-                                        .split("/")[4];
-                            
-                            let time = new DateTime().getCurrentTime();
-                            let date = new DateTime().getCurrentDate();
-                            
-                            let like = new Like();
-                            like.setId(id).setAuthor(author).setLink(link).setTime(time).setDate(date);
-                            MCM.addLike(like);
-                        });
+                alert("Čestitamo, proširenje je uspešno podešeno! " +
+                      "Za pristup podešavanjima i ostalim opcijama " +
+                      "proširenja kliknite na ikonicu proširenja " +
+                      "koja se nalazi pored polja za kucanje URL-a.");
+            });
+        } else {
+            storage.get("mcm-settings", (result) => {
+                let like_tracker = result["mcm-settings"]["like_tracker"];
+                if (like_tracker) {
+                    if (document.getElementsByClassName("lajk").length) {
+                        let likes = document.getElementsByClassName("lajk");
+            
+                        for (let i = 0; i < likes.length; i++) {
+                            likes[i].addEventListener("click", () => {
+                                let href = likes[i].getAttribute("href");
+                                let id   = href.split(",")[1].slice(1, href.split(",")[1].length - 1);
+                                let link = url.split("#")[0] + "#p" + id;
+                                let author = document.getElementById("tabela_poruke_"+id)
+                                            .getElementsByClassName("profile")[0].getAttribute("href")
+                                            .split("/")[4];
+                                    
+                                let time = new DateTime().getCurrentTime();
+                                let date = new DateTime().getCurrentDate();
+                                    
+                                let like = new Like();
+                                like.setId(id).setAuthor(author).setLink(link).setTime(time).setDate(date);
+                                MCM.addLike(like);
+                            });
+                        }
                     }
                 }
-            }
-        });
-    }
+            });
+        }
+    });
 });

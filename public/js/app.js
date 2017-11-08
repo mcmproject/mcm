@@ -13,6 +13,9 @@ var app = (function () {
     return api;
 })();
 document.addEventListener("DOMContentLoaded", function () {
+    var escapeHTML = function (str) {
+        return str.replace(/[&"'<>]/g, function (m) { return ({ "&": "&amp;", '"': "&quot;", "'": "&#39;", "<": "&lt;", ">": "&gt;" })[m]; });
+    };
     var like_tracking = document.getElementById("likes-setting");
     chrome.storage.local.get("mcm-settings", function (result) {
         var settings = result["mcm-settings"];
@@ -35,9 +38,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 var a = document.createElement("a");
                 var time = document.createElement("td");
                 var date = document.createElement("td");
-                author.innerHTML = likes[i]["author"];
-                time.innerHTML = likes[i]["time"];
-                date.innerHTML = likes[i]["date"];
+                author.innerHTML = escapeHTML(likes[i]["author"]);
+                time.innerHTML = escapeHTML(likes[i]["time"]);
+                date.innerHTML = escapeHTML(likes[i]["date"]);
                 tr.appendChild(author);
                 a.innerText = likes[i]["link"];
                 a.href = likes[i]["link"];
