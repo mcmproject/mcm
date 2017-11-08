@@ -1,7 +1,7 @@
 let app = (() => {
-    let version   = "1.0.0",
+    let version   = "1.0.1",
         codeName  = "Nikozija",
-        buildDate = "05.11.2017.",
+        buildDate = "08.11.2017.",
 
         api = {
             getVersion() {

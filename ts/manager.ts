@@ -2,9 +2,9 @@
 
 "use strict";
 
-const version = "1.0.0";
+const version = "1.0.1";
 const codeName = "Nikozija";
-const buildDate = "05.11.2017.";
+const buildDate = "08.11.2017.";
 
 let storage = chrome.storage.local;
 
