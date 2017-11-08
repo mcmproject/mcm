@@ -5,12 +5,10 @@ https://mcmproject.github.io
 
 ## Trenutna verzija
 
-*1.0.0 Nikozija*
+*1.0.1 Nikozija*
 
-- Čuvanje lajkovanih postova
-- Jedinstven interfejs
-- Podešavanja
-- Brisanje sesija
+- Izmenjeno podešavanje koje je aktiviralo proširenje na svim sajtovima
+- Ispravljen bag koji bi zabeležio link do najnovije poruke u temi kada je lajkovana neka druga, a korisnik u temu stigao preko ikonice za pregled najnovije poruke
 
 ## Prioriteti
 
