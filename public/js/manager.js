@@ -1,8 +1,8 @@
 /// <reference types="chrome"/>
 "use strict";
-var version = "1.0.0";
+var version = "1.0.1";
 var codeName = "Nikozija";
-var buildDate = "05.11.2017.";
+var buildDate = "08.11.2017.";
 var storage = chrome.storage.local;
 var MCM = (function () {
     function MCM() {

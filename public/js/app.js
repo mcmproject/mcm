@@ -1,5 +1,5 @@
 var app = (function () {
-    var version = "1.0.0", codeName = "Nikozija", buildDate = "05.11.2017.", api = {
+    var version = "1.0.1", codeName = "Nikozija", buildDate = "08.11.2017.", api = {
         getVersion: function () {
             return version;
         },
