@@ -3,7 +3,8 @@
   
     "name": "MyCity Manager",
     "description": "MyCity Manager proširenje za MyCity i MyCity Military forume.",
-    "version": "1.0.1",
+    "version": "1.1.0",
+    "update_url": "https://mcmproject.github.io/download/updates.xml",
 
     "content_scripts": [
         {
@@ -12,7 +13,11 @@
                 "https://www.mycity.rs/*",
                 "https://www.mycity-military.com/*"
             ],
-            "js": ["public/js/manager.js"]
+            "js": [
+                "public/js/manager.js",
+                "public/js/gifffer.min.js",
+                "public/js/loader.js"
+            ]
         }
     ],
     "background": {

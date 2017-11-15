@@ -11,6 +11,12 @@
             <a href='#' id='new' class='btn btn-primary'>
                 <span class='glyphicon glyphicon-file'></span> &nbsp; Nova sesija
             </a>
+            <a href='#' id='import' class='btn btn-primary' data-toggle='modal' data-target='#import-data'>
+                <span class='glyphicon glyphicon-cloud-upload'></span> &nbsp; Uvoz podataka
+            </a>
+            <a href='#' id='export' class='btn btn-primary' data-toggle='modal' data-target='#export-data'>
+                <span class='glyphicon glyphicon-cloud-download'></span> &nbsp; Izvoz podataka
+            </a>
             <a href='#' id='informations' class='btn btn-primary right'>
                 <span class='glyphicon glyphicon-info-sign'></span> &nbsp; Informacije
             </a>
@@ -58,8 +64,52 @@
                     <div id="settings" class="tab-pane fade">
                         <h3>Podešavanja</h3>
                         <p id="settings-list">
-                            <input type="checkbox" id="likes-setting"/> &nbsp; Beleži postove koje lajkujem
+                            <p><input type="checkbox" id="likes-setting"> &nbsp; Beleži postove koje lajkujem</p>
+                            <p><input type="checkbox" id="gifffer-setting"/> &nbsp; Automatski pauziraj GIF-ove pri učitavanju stranice</p>
                         </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="import-data" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Uvoz podataka</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Izaberite .json fajl sa vašeg diska sa izvezenim podacima iz MyCity Manager-a klikom na
+                            dugme <i>Izaberi fajl</i> ili podatke iskopirajte i nalepite u tekstualno polje ispod te
+                            kliknite na dugme <i>Uvezi</i> (prva opcija ne radi u starijim pregledačima).
+                        </p>
+                        <input type="text" id="import-data-json" class="form-control"/>
+                        <input type="checkbox" id="import-settings" checked="checked"/> &nbsp; Primeni i podešavanja
+                    </div>
+                    <div class="modal-footer">
+                        <label class="btn btn-primary"><input type="file" id="import-data-json-file"/>Izaberi fajl</label>
+                        <button type="button" class="btn btn-success" id="apply-data-json">Uvezi</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="export-data" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Izvoz podataka</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>Kopirajte podatke iz ovog polja i sačuvajte ih kao fajl sa .json ekstenzijom ili
+                            kliknite na dugme <i>Preuzmi</i> da preuzmete gotov fajl (poslednja opcija nije
+                            podržana na starijim pregledačima).
+                        </p>
+                        <input type="text" id="export-data-json" class="form-control"/>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="download-data-json">Preuzmi fajl</button>
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">OK</button>
                     </div>
                 </div>
             </div>

@@ -5,10 +5,11 @@ https://mcmproject.github.io
 
 ## Trenutna verzija
 
-*1.0.1 Nikozija*
+*1.1.0 Istanbul*
 
-- Izmenjeno podešavanje koje je aktiviralo proširenje na svim sajtovima
-- Ispravljen bag koji bi zabeležio link do najnovije poruke u temi kada je lajkovana neka druga, a korisnik u temu stigao preko ikonice za pregled najnovije poruke
+- Omogućen uvoz i izvoz podataka
+- Dodato podešavanje za automatsko pauziranje GIF-ova pri učitavanju stranice (opcija se ne odnosi na smajlije i na GIF-ove van postova)
+- Omogućeno automatsko ažuriranje
 
 ## Prioriteti
 

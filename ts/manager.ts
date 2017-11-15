@@ -2,9 +2,9 @@
 
 "use strict";
 
-const version = "1.0.1";
-const codeName = "Nikozija";
-const buildDate = "08.11.2017.";
+const version = "1.1.0";
+const codeName = "Istanbul";
+const buildDate = "15.11.2017.";
 
 let storage = chrome.storage.local;
 
@@ -147,7 +147,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let mcm_likes = [];
         
             let mcm_settings = {
-                "like_tracker": true
+                "like_tracker": true,
+                "gifffer": false
             };
         
             storage.set({"mcm": mcm}, () => {

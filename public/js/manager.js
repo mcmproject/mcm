@@ -1,8 +1,8 @@
 /// <reference types="chrome"/>
 "use strict";
-var version = "1.0.1";
-var codeName = "Nikozija";
-var buildDate = "08.11.2017.";
+var version = "1.1.0";
+var codeName = "Istanbul";
+var buildDate = "15.11.2017.";
 var storage = chrome.storage.local;
 var MCM = (function () {
     function MCM() {
@@ -134,7 +134,8 @@ document.addEventListener("DOMContentLoaded", function () {
             };
             var mcm_likes = [];
             var mcm_settings = {
-                "like_tracker": true
+                "like_tracker": true,
+                "gifffer": false
             };
             storage.set({ "mcm": mcm }, function () {
                 if (chrome.runtime.lastError) {

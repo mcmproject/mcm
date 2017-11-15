@@ -1,7 +1,7 @@
 let app = (() => {
-    let version   = "1.0.1",
-        codeName  = "Nikozija",
-        buildDate = "08.11.2017.",
+    let version   = "1.1.0",
+        codeName  = "Istanbul",
+        buildDate = "15.11.2017.",
 
         api = {
             getVersion() {
@@ -19,6 +19,54 @@ let app = (() => {
 })();
 
 document.addEventListener("DOMContentLoaded", () => {
+
+    chrome.storage.local.get("mcm", (result) => {
+        let results = result.mcm;
+        if (results === undefined) {
+            let mcm = {
+                "version": app.getVersion(),
+                "codeName": app.getCodeName(),
+                "buildDate": app.getBuildDate()
+            };
+        
+            let mcm_likes = [];
+        
+            let mcm_settings = {
+                "like_tracker": true,
+                "gifffer": false
+            };
+        
+            chrome.storage.local.set({"mcm": mcm}, () => {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Opšti podaci o proširenju su dodati.");
+            });
+        
+            chrome.storage.local.set({"mcm-likes": mcm_likes}, () => {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Skladište za praćenje lajkova je dodato.");
+            });
+        
+            chrome.storage.local.set({"mcm-settings": mcm_settings}, () => {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Podešavanja proširenja su dodata.");
+        
+                alert("Čestitamo, proširenje je uspešno podešeno! " +
+                      "Za pristup podešavanjima i ostalim opcijama " +
+                      "proširenja kliknite na ikonicu proširenja " +
+                      "koja se nalazi pored polja za kucanje URL-a.");
+            });
+        }
+    });
+
+    let likes = null;
+    let dataForExport = null;
+
     let escapeHTML = (str) => { 
         return str.replace(/[&"'<>]/g, (m) => ({ "&": "&amp;", '"': "&quot;", "'": "&#39;", "<": "&lt;", ">": "&gt;" })[m]); 
     }
@@ -33,7 +81,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    let likes = null;
+    let gifffer = (<HTMLInputElement>document.getElementById("gifffer-setting"));
+    chrome.storage.local.get("mcm-settings", (result) => {
+        let settings = result["mcm-settings"];
+        if (settings["gifffer"]) {
+            gifffer.checked = true;
+        } else {
+            gifffer.checked = false;
+        }
+    });
     
     chrome.storage.local.get("mcm-likes", (result) => {
         likes = result["mcm-likes"];
@@ -79,13 +135,65 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    document.getElementById("export").addEventListener("click", () => {
+        let likes = null;
+        let settings = null;
+
+        chrome.storage.local.get("mcm-likes", (result) => {
+            if (chrome.runtime.lastError) {
+                console.log(chrome.runtime.lastError);
+                throw new Error(String(chrome.runtime.lastError));
+            } else {
+                likes = result["mcm-likes"];
+            }
+        });
+
+        chrome.storage.local.get("mcm-settings", (result) => {
+            if (chrome.runtime.lastError) {
+                console.log(chrome.runtime.lastError);
+                throw new Error(String(chrome.runtime.lastError));
+            } else {
+                if (likes.length) {
+                    settings = result["mcm-settings"];
+
+                    dataForExport = JSON.stringify({
+                        "mcm-likes": likes,
+                        "mcm-settings": settings
+                    });
+
+                    document.getElementById("export-data-json").setAttribute("value", dataForExport);
+                } else {
+                    document.getElementById("download-data-json").setAttribute("disabled", "disabled");
+                    alert("Trenutno nema podataka za izvoz!");
+                }
+            }
+        });
+    });
+
+    document.getElementById("export-data-json").addEventListener("click", () => {
+        let field = (<HTMLInputElement>document.getElementById("export-data-json"));
+        field.setSelectionRange(0, field.value.length);
+    });
+
+    document.getElementById("download-data-json").addEventListener("click", () => {
+        let blob = new Blob([dataForExport], { type: "text/json" });
+        if (window.navigator.msSaveOrOpenBlob) {
+            window.navigator.msSaveBlob(blob, "mcm.json");
+        } else {
+            let a = document.createElement("a");
+            a.href = window.URL.createObjectURL(blob);
+            a.download = "mcm.json";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    });
+
     document.getElementById("informations").addEventListener("click", () => {
         alert(
             "Verzija: " + app.getVersion() + "\n" +
             "Kodno ime: " + app.getCodeName() + "\n" +
-            "Datum izgradnje: " + app.getBuildDate() + "\n\n" +
-            "Ovo je eksperimentalna verzija proširenja."
-        );
+            "Datum izgradnje: " + app.getBuildDate() + "\n");
     });
 
     document.getElementById("likes-setting").addEventListener("click", () => {
@@ -116,6 +224,147 @@ document.addEventListener("DOMContentLoaded", () => {
                     console.log("Praćenje lajkova je uključeno.");
                 })
             });
+        }
+    });
+
+    document.getElementById("gifffer-setting").addEventListener("click", () => {
+        let setting = (<HTMLInputElement>document.getElementById("gifffer-setting"));
+        if (!setting.checked) {
+            chrome.storage.local.get("mcm-settings", (result) => {
+                let settings = result["mcm-settings"];
+                settings["gifffer"] = false;
+                chrome.storage.local.set({"mcm-settings": settings}, () => {
+                    if (chrome.runtime.lastError) {
+                        alert("Došlo je do greške pri promeni podešavanja!");
+                        console.log(chrome.runtime.lastError);
+                        throw new Error("Došlo je do greške pri promeni podešavanja.");
+                    }
+                    console.log("Automatsko pauziranje GIF-ova je isključeno.");
+                })
+            });
+        } else {
+            chrome.storage.local.get("mcm-settings", (result) => {
+                let settings = result["mcm-settings"];
+                settings["gifffer"] = true;
+                chrome.storage.local.set({"mcm-settings": settings}, () => {
+                    if (chrome.runtime.lastError) {
+                        alert("Došlo je do greške pri promeni podešavanja!");
+                        console.log(chrome.runtime.lastError);
+                        throw new Error("Došlo je do greške pri promeni podešavanja.");
+                    }
+                    console.log("Automatsko pauziranje GIF-ova je uključeno.");
+                })
+            });
+        }
+    });
+
+    let disableApplyDataButton = () => {
+        document.getElementById("apply-data-json").setAttribute("disabled", "disabled");
+    }
+
+    let enableApplyDataButton = () => {
+        document.getElementById("apply-data-json").removeAttribute("disabled");
+    }
+
+    document.getElementById("import-data-json-file").addEventListener("change", function() {
+        disableApplyDataButton();
+
+        if (!(File && FileReader && FileList && Blob)) {
+            alert("Vaš pregledač ne podržava opciju učitavanja fajlova lokalno; morate prekopirati sadržaj fajla u polje!");
+            enableApplyDataButton();
+            return;
+        }
+
+        let files = (<HTMLInputElement>document.getElementById("import-data-json-file")).files;
+        
+        if (!files.length) {
+            alert("Molimo vas da izaberete fajl sa podacima!");
+            enableApplyDataButton();
+            return;
+        }
+
+        let file = files[0];
+        let reader = new FileReader();
+
+        reader.onload = (e: any) => {
+            (<HTMLInputElement>document.getElementById("import-data-json")).value = reader.result;
+            enableApplyDataButton();
+        }
+
+        reader.readAsText(file);
+    });
+
+    document.getElementById("apply-data-json").addEventListener("click", function() {
+
+        disableApplyDataButton();
+
+        let data = (<HTMLInputElement>document.getElementById("import-data-json")).value;
+        let importSettings = (<HTMLInputElement>document.getElementById("import-settings")).checked;
+        
+        if (data.trim() == "") {
+            alert("Molimo vas da dodate fajl sa podacima ili podatke kopirate u polje pre klika na dugme 'Uvezi'!");
+        }
+
+        data = JSON.parse(data);
+        if (data["mcm-likes"] === undefined || !Array.isArray(data["mcm-likes"])) {
+            alert("Uneti podaci nisu validni!");
+            enableApplyDataButton();
+            return;
+        } else {
+            let likes = [];
+
+            chrome.storage.local.get("mcm-likes", (result) => {
+                likes = result["mcm-likes"];
+            });
+
+            for (let i = 0; i < data["mcm-likes"].length; i++) {
+                let like = data["mcm-likes"][i];
+                likes.push({
+                    "id": like["id"],
+                    "author": like["author"],
+                    "link": like["link"],
+                    "time": like["time"],
+                    "date": like["date"]
+                });
+            }
+
+            chrome.storage.local.set({"mcm-likes": likes}, () => {
+                if (chrome.runtime.lastError) {
+                    alert("Došlo je do greške pri izmeni podataka!");
+                    console.log(chrome.runtime.lastError);
+                    throw new Error("Došlo je do greške pri izmeni podataka.");
+                }
+                console.log("Podaci o lajkovima su uvezeni.");
+                
+                if (importSettings) {
+                    if (data["mcm-settings"] === undefined) {
+                        alert("Podaci o podešavanjima nisu validni!");
+                        enableApplyDataButton();
+                        return;
+                    }
+
+                    let settings = {};
+
+                    if (data["mcm-settings"]["like_tracker"] !== undefined) {
+                        settings["like_tracker"] = data["mcm-settings"]["like_tracker"];
+                    }
+
+                    if (data["mcm-settings"]["gifffer"] !== undefined) {
+                        settings["gifffer"] = data["mcm-settings"]["gifffer"];
+                    }
+
+                    chrome.storage.local.set({"mcm-settings": settings}, () => {
+                        if (chrome.runtime.lastError) {
+                            alert("Došlo je do greške pri izmeni podataka!");
+                            console.log(chrome.runtime.lastError);
+                            throw new Error("Došlo je do greške pri izmeni podataka.");
+                        }
+                        console.log("Podešavanja su uspešno primenjena.");
+                    });
+                }
+            });
+
+            window.location.reload();
         }
     });
 });
