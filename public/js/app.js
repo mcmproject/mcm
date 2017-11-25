@@ -1,5 +1,5 @@
 var app = (function () {
-    var version = "1.1.0", codeName = "Istanbul", buildDate = "15.11.2017.", api = {
+    var version = "1.2.0", codeName = "Atina", buildDate = "25.11.2017.", api = {
         getVersion: function () {
             return version;
         },
@@ -12,6 +12,82 @@ var app = (function () {
     };
     return api;
 })();
+var Setting = (function () {
+    function Setting() {
+        this.element = null;
+        this.settingName = null;
+        this.messageOnTurnedOn = null;
+        this.messageOnTurnedOff = null;
+    }
+    Setting.prototype.setElement = function (element) {
+        this.element = element;
+        return this;
+    };
+    Setting.prototype.setSettingName = function (settingName) {
+        this.settingName = settingName;
+        return this;
+    };
+    Setting.prototype.setMessageOnTurnedOn = function (messageOnTurnedOn) {
+        this.messageOnTurnedOn = messageOnTurnedOn;
+        return this;
+    };
+    Setting.prototype.setMessageOnTurnedOff = function (messageOnTurnedOff) {
+        this.messageOnTurnedOff = messageOnTurnedOff;
+        return this;
+    };
+    Setting.prototype.attachSetting = function () {
+        var _this = this;
+        if (this.element === null ||
+            this.settingName === null ||
+            this.messageOnTurnedOn === null ||
+            this.messageOnTurnedOff === null) {
+            alert("Podešavanje ne može biti primenjeno bez popunjavanja svih parametara!");
+            throw new Error("Neki parametri podešavanja nisu popunjeni.");
+        }
+        document.getElementById(this.element.id).addEventListener("click", function () {
+            if (!_this.element.checked) {
+                chrome.storage.local.get("mcm-settings", function (result) {
+                    var settings = result["mcm-settings"];
+                    settings[_this.settingName] = false;
+                    chrome.storage.local.set({ "mcm-settings": settings }, function () {
+                        if (chrome.runtime.lastError) {
+                            alert("Došlo je do greške pri promeni podešavanja!");
+                            console.log(chrome.runtime.lastError);
+                            throw new Error("Došlo je do greške pri promeni podešavanja.");
+                        }
+                        console.log(_this.messageOnTurnedOff);
+                    });
+                });
+            }
+            else {
+                chrome.storage.local.get("mcm-settings", function (result) {
+                    var settings = result["mcm-settings"];
+                    settings[_this.settingName] = true;
+                    chrome.storage.local.set({ "mcm-settings": settings }, function () {
+                        if (chrome.runtime.lastError) {
+                            alert("Došlo je do greške pri promeni podešavanja!");
+                            console.log(chrome.runtime.lastError);
+                            throw new Error("Došlo je do greške pri promeni podešavanja.");
+                        }
+                        console.log(_this.messageOnTurnedOn);
+                    });
+                });
+            }
+        });
+        chrome.storage.local.get("mcm-settings", function (result) {
+            var settings = result["mcm-settings"];
+            _this.element.checked = (settings[_this.settingName]) ? true : false;
+        });
+        this.addToSettingRegister();
+    };
+    Setting.prototype.addToSettingRegister = function () {
+        if (this.settingName !== null) {
+            Setting.settingRegister.push(this.settingName);
+        }
+    };
+    Setting.settingRegister = [];
+    return Setting;
+}());
 document.addEventListener("DOMContentLoaded", function () {
     chrome.storage.local.get("mcm", function (result) {
         var results = result.mcm;
@@ -24,7 +100,9 @@ document.addEventListener("DOMContentLoaded", function () {
             var mcm_likes = [];
             var mcm_settings = {
                 "like_tracker": true,
-                "gifffer": false
+                "gifffer": false,
+                "yt_block": false,
+                "auto_fill": false
             };
             chrome.storage.local.set({ "mcm": mcm }, function () {
                 if (chrome.runtime.lastError) {
@@ -49,32 +127,33 @@ document.addEventListener("DOMContentLoaded", function () {
                     "koja se nalazi pored polja za kucanje URL-a.");
             });
         }
+        else {
+            chrome.storage.local.get("mcm-settings", function (result) {
+                var settings = result["mcm-settings"];
+                var updateSettings = false;
+                if (settings["yt_block"] === undefined) {
+                    settings["yt_block"] = false;
+                    updateSettings = true;
+                }
+                if (settings["auto_fill"] === undefined) {
+                    settings["auto_fill"] = false;
+                    updateSettings = true;
+                }
+                if (updateSettings) {
+                    chrome.storage.local.set({ "mcm-settings": settings }, function () {
+                        if (chrome.runtime.lastError) {
+                            ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                        }
+                    });
+                }
+            });
+        }
     });
     var likes = null;
     var dataForExport = null;
     var escapeHTML = function (str) {
         return str.replace(/[&"'<>]/g, function (m) { return ({ "&": "&amp;", '"': "&quot;", "'": "&#39;", "<": "&lt;", ">": "&gt;" })[m]; });
     };
-    var like_tracking = document.getElementById("likes-setting");
-    chrome.storage.local.get("mcm-settings", function (result) {
-        var settings = result["mcm-settings"];
-        if (settings["like_tracker"]) {
-            like_tracking.checked = true;
-        }
-        else {
-            like_tracking.checked = false;
-        }
-    });
-    var gifffer = document.getElementById("gifffer-setting");
-    chrome.storage.local.get("mcm-settings", function (result) {
-        var settings = result["mcm-settings"];
-        if (settings["gifffer"]) {
-            gifffer.checked = true;
-        }
-        else {
-            gifffer.checked = false;
-        }
-    });
     chrome.storage.local.get("mcm-likes", function (result) {
         likes = result["mcm-likes"];
         if (likes !== null) {
@@ -170,68 +249,30 @@ document.addEventListener("DOMContentLoaded", function () {
             "Kodno ime: " + app.getCodeName() + "\n" +
             "Datum izgradnje: " + app.getBuildDate() + "\n");
     });
-    document.getElementById("likes-setting").addEventListener("click", function () {
-        var setting = document.getElementById("likes-setting");
-        if (!setting.checked) {
-            chrome.storage.local.get("mcm-settings", function (result) {
-                var settings = result["mcm-settings"];
-                settings["like_tracker"] = false;
-                chrome.storage.local.set({ "mcm-settings": settings }, function () {
-                    if (chrome.runtime.lastError) {
-                        alert("Došlo je do greške pri promeni podešavanja!");
-                        console.log(chrome.runtime.lastError);
-                        throw new Error("Došlo je do greške pri promeni podešavanja.");
-                    }
-                    console.log("Praćenje lajkova je isključeno.");
-                });
-            });
-        }
-        else {
-            chrome.storage.local.get("mcm-settings", function (result) {
-                var settings = result["mcm-settings"];
-                settings["like_tracker"] = true;
-                chrome.storage.local.set({ "mcm-settings": settings }, function () {
-                    if (chrome.runtime.lastError) {
-                        alert("Došlo je do greške pri promeni podešavanja!");
-                        console.log(chrome.runtime.lastError);
-                        throw new Error("Došlo je do greške pri promeni podešavanja.");
-                    }
-                    console.log("Praćenje lajkova je uključeno.");
-                });
-            });
-        }
-    });
-    document.getElementById("gifffer-setting").addEventListener("click", function () {
-        var setting = document.getElementById("gifffer-setting");
-        if (!setting.checked) {
-            chrome.storage.local.get("mcm-settings", function (result) {
-                var settings = result["mcm-settings"];
-                settings["gifffer"] = false;
-                chrome.storage.local.set({ "mcm-settings": settings }, function () {
-                    if (chrome.runtime.lastError) {
-                        alert("Došlo je do greške pri promeni podešavanja!");
-                        console.log(chrome.runtime.lastError);
-                        throw new Error("Došlo je do greške pri promeni podešavanja.");
-                    }
-                    console.log("Automatsko pauziranje GIF-ova je isključeno.");
-                });
-            });
-        }
-        else {
-            chrome.storage.local.get("mcm-settings", function (result) {
-                var settings = result["mcm-settings"];
-                settings["gifffer"] = true;
-                chrome.storage.local.set({ "mcm-settings": settings }, function () {
-                    if (chrome.runtime.lastError) {
-                        alert("Došlo je do greške pri promeni podešavanja!");
-                        console.log(chrome.runtime.lastError);
-                        throw new Error("Došlo je do greške pri promeni podešavanja.");
-                    }
-                    console.log("Automatsko pauziranje GIF-ova je uključeno.");
-                });
-            });
-        }
-    });
+    var likesSetting = new Setting()
+        .setElement(document.getElementById("likes-setting"))
+        .setSettingName("like_tracker")
+        .setMessageOnTurnedOn("Praćenje lajkova je uključeno.")
+        .setMessageOnTurnedOff("Praćenje lajkova je isključeno.")
+        .attachSetting();
+    var giffferSetting = new Setting()
+        .setElement(document.getElementById("gifffer-setting"))
+        .setSettingName("gifffer")
+        .setMessageOnTurnedOn("Automatsko pauziranje GIF-ova je uključeno.")
+        .setMessageOnTurnedOff("Automatsko pauziranje GIF-ova je isključeno.")
+        .attachSetting();
+    var ytBlockSetting = new Setting()
+        .setElement(document.getElementById("yt-block-setting"))
+        .setSettingName("yt_block")
+        .setMessageOnTurnedOn("Automatsko blokiranje YouTube video zapisa je uključeno.")
+        .setMessageOnTurnedOff("Automatsko blokiranje YouTube video zapisa je isključeno.")
+        .attachSetting();
+    var autoFillSetting = new Setting()
+        .setElement(document.getElementById("auto-fill-setting"))
+        .setSettingName("auto_fill")
+        .setMessageOnTurnedOn("Automatsko popunjavanje postova sa manje od 10 slova je uključeno.")
+        .setMessageOnTurnedOff("Automatsko popunjavanje postova sa manje od 10 slova je isključeno.")
+        .attachSetting();
     var disableApplyDataButton = function () {
         document.getElementById("apply-data-json").setAttribute("disabled", "disabled");
     };
@@ -301,11 +342,11 @@ document.addEventListener("DOMContentLoaded", function () {
                         return;
                     }
                     var settings = {};
-                    if (data["mcm-settings"]["like_tracker"] !== undefined) {
-                        settings["like_tracker"] = data["mcm-settings"]["like_tracker"];
-                    }
-                    if (data["mcm-settings"]["gifffer"] !== undefined) {
-                        settings["gifffer"] = data["mcm-settings"]["gifffer"];
+                    for (var i = 0; i < Setting.settingRegister.length; i++) {
+                        var setting = Setting.settingRegister[i];
+                        if (data["mcm-settings"][setting] !== undefined) {
+                            settings[setting] = data["mcm-settings"][setting];
+                        }
                     }
                     chrome.storage.local.set({ "mcm-settings": settings }, function () {
                         if (chrome.runtime.lastError) {

@@ -2,9 +2,9 @@
 
 "use strict";
 
-const version = "1.1.0";
-const codeName = "Istanbul";
-const buildDate = "15.11.2017.";
+const version = "1.2.0";
+const codeName = "Atina";
+const buildDate = "21.11.2017.";
 
 let storage = chrome.storage.local;
 
@@ -148,7 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
         
             let mcm_settings = {
                 "like_tracker": true,
-                "gifffer": false
+                "gifffer": false,
+                "yt_block": false,
+                "auto_fill": false
             };
         
             storage.set({"mcm": mcm}, () => {
@@ -178,7 +180,28 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         } else {
             storage.get("mcm-settings", (result) => {
-                let like_tracker = result["mcm-settings"]["like_tracker"];
+                let settings = result["mcm-settings"];
+                let updateSettings = false;
+
+                if (settings["yt_block"] === undefined) {
+                    settings["yt_block"] = false;
+                    updateSettings = true;
+                }
+
+                if (settings["auto_fill"] === undefined) {
+                    settings["auto_fill"] = false;
+                    updateSettings = true;
+                }
+
+                if (updateSettings) {
+                    storage.set({"mcm-settings": settings}, () => {
+                        if (chrome.runtime.lastError) {
+                            ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                        }
+                    });
+                }
+
+                let like_tracker = settings["like_tracker"];
                 if (like_tracker) {
                     if (document.getElementsByClassName("lajk").length) {
                         let likes = document.getElementsByClassName("lajk");

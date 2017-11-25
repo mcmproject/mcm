@@ -1,11 +1,16 @@
 var gifffer = null;
+var ytBlock = null;
+var autoFill = null;
 
 chrome.storage.local.get("mcm-settings", function(result) {
     if (chrome.runtime.lastError) {
-        console.log(console.runtime.lastError);
+        console.log(chrome.runtime.lastError);
+        throw new Error(chrome.runtime.lastError);
     }
     var settings = result["mcm-settings"];
     gifffer = settings["gifffer"];
+    ytBlock = settings["yt_block"];
+    autoFill = settings["auto_fill"];
 
     window.onload = function() {
         if (gifffer) {
@@ -19,6 +24,30 @@ chrome.storage.local.get("mcm-settings", function(result) {
                 }
             }
             Gifffer();
+        }
+        if (ytBlock) {
+            var ytVideos = document.getElementsByClassName("youtube");
+            while (ytVideos[0]) {
+                ytVideos[0].parentNode.removeChild(ytVideos[0]);
+            }
+        }
+        if (autoFill) {
+            if (document.getElementById("reply")) {
+                var submitButton = document.getElementsByName("post")[1];
+
+                submitButton.addEventListener("click", function handler(e) {
+                    e.preventDefault();
+
+                    var postField = document.getElementById("reply");
+
+                    if (postField.value.length < 10) {
+                        postField.value = postField.value + "[b][/b][b][/b]";
+                    }
+
+                    submitButton.removeEventListener("click", handler);
+                    submitButton.click();
+                });
+            }
         }
     }
 });

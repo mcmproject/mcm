@@ -5,11 +5,10 @@ https://mcmproject.github.io
 
 ## Trenutna verzija
 
-*1.1.0 Istanbul*
+*1.2.0 Atina*
 
-- Omogućen uvoz i izvoz podataka
-- Dodato podešavanje za automatsko pauziranje GIF-ova pri učitavanju stranice (opcija se ne odnosi na smajlije i na GIF-ove van postova)
-- Omogućeno automatsko ažuriranje
+- Omogućeno podešavanje za blokiranje YouTube snimaka
+- Omogućeno podešavanje za automatsko popunjavanje posta ukoliko sadrži manje od 10 karaktera
 
 ## Prioriteti
 
