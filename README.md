@@ -1,6 +1,7 @@
 # MyCity Manager
 
 MyCity Manager proširenje za MyCity i MyCity Military.
+
 https://mcmproject.github.io
 
 ## Trenutna verzija
