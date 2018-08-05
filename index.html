@@ -8,17 +8,14 @@
     </head>
     <body>
         <div class='row menu'>
-            <a href='#' id='new' class='btn btn-primary'>
-                <span class='glyphicon glyphicon-file'></span> &nbsp; Nova sesija
-            </a>
             <a href='#' id='import' class='btn btn-primary' data-toggle='modal' data-target='#import-data'>
                 <span class='glyphicon glyphicon-cloud-upload'></span> &nbsp; Uvoz podataka
             </a>
             <a href='#' id='export' class='btn btn-primary' data-toggle='modal' data-target='#export-data'>
                 <span class='glyphicon glyphicon-cloud-download'></span> &nbsp; Izvoz podataka
             </a>
-            <a href='#' id='informations' class='btn btn-primary right'>
-                <span class='glyphicon glyphicon-info-sign'></span> &nbsp; Informacije
+            <a href='#' id='delete' class='btn btn-primary'>
+                <span class='glyphicon glyphicon-trash'></span> &nbsp; Obriši podatke
             </a>
         </div>
         <div class="row">
@@ -34,6 +31,11 @@
                             <li class="list-group-item">
                                 <a data-toggle="tab" href="#settings" class="menu-items">
                                     <span class="glyphicon glyphicon-wrench"></span> &nbsp; Podešavanja
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#about" class="menu-items">
+                                    <span class="glyphicon glyphicon-info-sign"></span> &nbsp; Informacije
                                 </a>
                             </li>
                         </ul>
@@ -63,12 +65,34 @@
                     </div>
                     <div id="settings" class="tab-pane fade">
                         <h3>Podešavanja</h3>
-                        <p id="settings-list">
-                            <p><input type="checkbox" id="likes-setting"/> &nbsp; Beleži postove koje lajkujem</p>
+                        <div id="settings-list">
+                            <p><input type="checkbox" id="likes-setting"/> &nbsp; Beleži poruke koje lajkujem</p>
                             <p><input type="checkbox" id="gifffer-setting"/> &nbsp; Automatski pauziraj GIF-ove pri učitavanju stranice</p>
-                            <p><input type="checkbox" id="yt-block-setting"/> &nbsp; Blokiraj YouTube video snimke (ova opcija će ukloniti video snimke iz postova)</p>
-                            <p><input type="checkbox" id="auto-fill-setting"/> &nbsp; Automatski dodaj prazne tagove u post ukoliko ima manje od 10 slova (koristiti samo za Pričaonicu!)</p>
-                        </p>
+                            <p><input type="checkbox" id="yt-block-setting"/> &nbsp; Blokiraj YouTube video snimke (ova opcija će ukloniti video snimke iz poruka)</p>
+                            
+                            <h4 class="settings-group">Opcije za slanje poruka</h4>
+                            <p><input type="checkbox" id="auto-fill-setting"/> &nbsp; Automatski dodaj prazne tagove u poruku ukoliko ima manje od 10 slova (koristiti samo za Pričaonicu!)</p>
+                            <p><input type="checkbox" id="post-html-setting"/> &nbsp; Uvek uključi HTML u poruci</p>
+                            <p><input type="checkbox" id="post-bbcode-setting"/> &nbsp; Uvek uključi BB kod u poruci</p>
+                            <p><input type="checkbox" id="post-smilies-setting"/> &nbsp; Uvek uključi smajlije u poruci</p>
+                            <p><input type="checkbox" id="post-signature-setting"/> &nbsp; Uvek prikači potpis</p>
+                            <p><input type="checkbox" id="post-email-setting"/> &nbsp; Uvek me obavesti mejlom kada neko odgovori</p>
+                        </div>
+                    </div>
+                    <div id="about" class="tab-pane fade">
+                        <h3>Informacije</h3>
+                        <div id="informations-list">
+                            <div id="mcm-info-title">
+                                <img id="mcm-info-logo" src="public/images/icon32.png">
+                                <h4 id="mcm-info-name">MyCity Manager</h4>
+                            </div>
+                            <ul id="mcm-info-list">
+                                <li><b>Verzija:</b> <span id="mcm-version"></span></li>
+                                <li><b>Kodno ime:</b> <span id="mcm-codename"></span></li>
+                                <li><b>Datum izgradnje:</b> <span id="mcm-build-date"></span></li>
+                                <li><b>Web sajt:</b> <a href="https://mcmproject.github.io/" target="_blank">https://mcmproject.github.io/</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -7,10 +7,16 @@ chrome.storage.local.get("mcm-settings", function(result) {
         console.log(chrome.runtime.lastError);
         throw new Error(chrome.runtime.lastError);
     }
+
     var settings = result["mcm-settings"];
-    gifffer = settings["gifffer"];
-    ytBlock = settings["yt_block"];
-    autoFill = settings["auto_fill"];
+    var gifffer = settings["gifffer"];
+    var ytBlock = settings["yt_block"];
+    var autoFill = settings["auto_fill"];
+    var postHTML = settings["post_html"];
+    var postBBCode = settings["post_bbcode"];
+    var postSmilies = settings["post_smilies"];
+    var postSignature = settings["post_signature"];
+    var postEmail = settings["post_email"];
 
     window.onload = function() {
         if (gifffer) {
@@ -31,8 +37,8 @@ chrome.storage.local.get("mcm-settings", function(result) {
                 ytVideos[0].parentNode.removeChild(ytVideos[0]);
             }
         }
-        if (autoFill) {
-            if (document.getElementById("reply")) {
+        if (document.getElementById("reply")) {
+            if (autoFill) {
                 var submitButton = document.getElementsByName("post")[1];
 
                 submitButton.addEventListener("click", function handler(e) {
@@ -47,6 +53,41 @@ chrome.storage.local.get("mcm-settings", function(result) {
                     submitButton.removeEventListener("click", handler);
                     submitButton.click();
                 });
+            }
+
+            if (postHTML) {
+                var element = document.getElementsByName("disable_html").item(0);
+                if (element.checked) {
+                    element.click();
+                }
+            }
+
+            if (!postBBCode) {
+                var element = document.getElementsByName("disable_bbcode").item(0);
+                if (!element.checked) {
+                    element.click();
+                }
+            }
+
+            if (!postSmilies) {
+                var element = document.getElementsByName("disable_smilies").item(0);
+                if (!element.checked) {
+                    element.click();
+                }
+            }
+
+            if (!postSignature) {
+                var element = document.getElementsByName("attach_sig").item(0);
+                if (element.checked) {
+                    element.click();
+                }
+            }
+
+            if (postEmail) {
+                var element = document.getElementsByName("notify").item(0);
+                if (!element.checked) {
+                    element.click();
+                }
             }
         }
     }

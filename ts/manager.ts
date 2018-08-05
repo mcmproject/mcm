@@ -2,9 +2,9 @@
 
 "use strict";
 
-const version = "1.2.0";
-const codeName = "Atina";
-const buildDate = "21.11.2017.";
+const version = "1.3.0";
+const codeName = "Skoplje";
+const buildDate = "05.08.2018.";
 
 let storage = chrome.storage.local;
 
@@ -150,7 +150,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 "like_tracker": true,
                 "gifffer": false,
                 "yt_block": false,
-                "auto_fill": false
+                "auto_fill": false,
+                "post_html": false,
+                "post_bbcode": true,
+                "post_smilies": true,
+                "post_signature": true,
+                "post_email": false
             };
         
             storage.set({"mcm": mcm}, () => {
@@ -190,6 +195,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (settings["auto_fill"] === undefined) {
                     settings["auto_fill"] = false;
+                    updateSettings = true;
+                }
+
+                if (settings["post_html"] === undefined) {
+                    settings["post_html"] = false;
+                    updateSettings = true;
+                }
+
+                if (settings["post_bbcode"] === undefined) {
+                    settings["post_bbcode"] = true;
+                    updateSettings = true;
+                }
+
+                if (settings["post_smilies"] === undefined) {
+                    settings["post_smilies"] = true;
+                    updateSettings = true;
+                }
+
+                if (settings["post_signature"] === undefined) {
+                    settings["post_signature"] = true;
+                    updateSettings = true;
+                }
+
+                if (settings["post_email"] === undefined) {
+                    settings["post_email"] = false;
                     updateSettings = true;
                 }
 

@@ -1,8 +1,8 @@
 /// <reference types="chrome"/>
 "use strict";
-var version = "1.2.0";
-var codeName = "Atina";
-var buildDate = "21.11.2017.";
+var version = "1.3.0";
+var codeName = "Skoplje";
+var buildDate = "05.08.2018.";
 var storage = chrome.storage.local;
 var MCM = (function () {
     function MCM() {
@@ -137,7 +137,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 "like_tracker": true,
                 "gifffer": false,
                 "yt_block": false,
-                "auto_fill": false
+                "auto_fill": false,
+                "post_html": false,
+                "post_bbcode": true,
+                "post_smilies": true,
+                "post_signature": true,
+                "post_email": false
             };
             storage.set({ "mcm": mcm }, function () {
                 if (chrome.runtime.lastError) {
@@ -172,6 +177,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 if (settings["auto_fill"] === undefined) {
                     settings["auto_fill"] = false;
+                    updateSettings = true;
+                }
+                if (settings["post_html"] === undefined) {
+                    settings["post_html"] = false;
+                    updateSettings = true;
+                }
+                if (settings["post_bbcode"] === undefined) {
+                    settings["post_bbcode"] = true;
+                    updateSettings = true;
+                }
+                if (settings["post_smilies"] === undefined) {
+                    settings["post_smilies"] = true;
+                    updateSettings = true;
+                }
+                if (settings["post_signature"] === undefined) {
+                    settings["post_signature"] = true;
+                    updateSettings = true;
+                }
+                if (settings["post_email"] === undefined) {
+                    settings["post_email"] = false;
                     updateSettings = true;
                 }
                 if (updateSettings) {

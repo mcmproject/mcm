@@ -5,19 +5,17 @@
   "main": "index.html",
   "dependencies": {
     "@types/chrome": "0.0.52",
-    "jslint": "^0.11.0"
+    "gulp": "^3.9.1",
+    "gulp-if": "^2.0.2",
+    "gulp-rename": "^1.4.0"
   },
   "devDependencies": {
-    "@types/node": "^8.0.47",
-    "gulp": "^3.9.1",
-    "gulp-concat": "^2.6.1",
-    "gulp-sourcemaps": "^2.6.1",
-    "gulp-typescript": "^3.2.3",
-    "gulp-uglify": "^3.0.0"
+    "@types/node": "^8.0.47"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "tsc": "tsc ts/*.ts --outDir public/js/"
+    "build": "tsc ts/*.ts --outDir public/js/",
+    "pack": "./node_modules/.bin/gulp -- pack"
   },
   "author": "Nikola S.",
   "license": "MIT"

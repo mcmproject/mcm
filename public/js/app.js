@@ -1,5 +1,5 @@
 var app = (function () {
-    var version = "1.2.0", codeName = "Atina", buildDate = "25.11.2017.", api = {
+    var version = "1.3.0", codeName = "Skoplje", buildDate = "05.08.2018.", api = {
         getVersion: function () {
             return version;
         },
@@ -89,6 +89,21 @@ var Setting = (function () {
     return Setting;
 }());
 document.addEventListener("DOMContentLoaded", function () {
+    /**
+     * Prikazivanje informacija o proširenju.
+     */
+    var mcmVersionField = document.getElementById("mcm-version");
+    var mcmVersionText = document.createTextNode(app.getVersion());
+    mcmVersionField.appendChild(mcmVersionText);
+    var mcmCodeNameField = document.getElementById("mcm-codename");
+    var mcmCodeNameText = document.createTextNode(app.getCodeName());
+    mcmCodeNameField.appendChild(mcmCodeNameText);
+    var mcmBuildDateField = document.getElementById("mcm-build-date");
+    var mcmBuildDateText = document.createTextNode(app.getBuildDate());
+    mcmBuildDateField.appendChild(mcmBuildDateText);
+    /**
+     * Učitavanje podešavanja proširenja.
+     */
     chrome.storage.local.get("mcm", function (result) {
         var results = result.mcm;
         if (results === undefined) {
@@ -102,7 +117,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 "like_tracker": true,
                 "gifffer": false,
                 "yt_block": false,
-                "auto_fill": false
+                "auto_fill": false,
+                "post_html": false,
+                "post_bbcode": true,
+                "post_smilies": true,
+                "post_signature": true,
+                "post_email": false
             };
             chrome.storage.local.set({ "mcm": mcm }, function () {
                 if (chrome.runtime.lastError) {
@@ -125,6 +145,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     "Za pristup podešavanjima i ostalim opcijama " +
                     "proširenja kliknite na ikonicu proširenja " +
                     "koja se nalazi pored polja za kucanje URL-a.");
+                window.location.reload();
             });
         }
         else {
@@ -137,6 +158,26 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 if (settings["auto_fill"] === undefined) {
                     settings["auto_fill"] = false;
+                    updateSettings = true;
+                }
+                if (settings["post_html"] === undefined) {
+                    settings["post_html"] = false;
+                    updateSettings = true;
+                }
+                if (settings["post_bbcode"] === undefined) {
+                    settings["post_bbcode"] = true;
+                    updateSettings = true;
+                }
+                if (settings["post_smilies"] === undefined) {
+                    settings["post_smilies"] = true;
+                    updateSettings = true;
+                }
+                if (settings["post_signature"] === undefined) {
+                    settings["post_signature"] = true;
+                    updateSettings = true;
+                }
+                if (settings["post_email"] === undefined) {
+                    settings["post_email"] = false;
                     updateSettings = true;
                 }
                 if (updateSettings) {
@@ -154,6 +195,9 @@ document.addEventListener("DOMContentLoaded", function () {
     var escapeHTML = function (str) {
         return str.replace(/[&"'<>]/g, function (m) { return ({ "&": "&amp;", '"': "&quot;", "'": "&#39;", "<": "&lt;", ">": "&gt;" })[m]; });
     };
+    /**
+     * Učitavanje i prikazivanje lajkovanih poruka.
+     */
     chrome.storage.local.get("mcm-likes", function (result) {
         likes = result["mcm-likes"];
         if (likes !== null) {
@@ -179,20 +223,26 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     });
-    document.getElementById("new").addEventListener("click", function () {
-        var choice = confirm("Da li ste sigurni da želite započnete novu sesiju? Ova opcija će " +
-            "obrisati sve do sada zabeležene podatke.");
+    /**
+     * Opcija za brisanje podataka.
+     */
+    document.getElementById("delete").addEventListener("click", function () {
+        var choice = confirm("Da li ste sigurni da želite da obrišete podatke? Ova opcija će " +
+            "obrisati sve do sada zabeležene podatke (podešavanja se ne brišu).");
         if (choice) {
             chrome.storage.local.set({ "mcm-likes": [] }, function () {
                 if (chrome.runtime.lastError) {
-                    alert("Došlo je do greške pri započinjanju nove sesije!");
+                    alert("Došlo je do greške pri brisanju podataka!");
                     console.log(chrome.runtime.lastError);
-                    throw new Error("Došlo je do greške pri započinjanju nove sesije.");
+                    throw new Error("Došlo je do greške pri brisanju podataka.");
                 }
             });
             window.location.reload();
         }
     });
+    /**
+     * Opcija za izvoz podataka.
+     */
     document.getElementById("export").addEventListener("click", function () {
         var likes = null;
         var settings = null;
@@ -226,6 +276,9 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+    /**
+     * Opcija za izvoz podataka.
+     */
     document.getElementById("export-data-json").addEventListener("click", function () {
         var field = document.getElementById("export-data-json");
         field.setSelectionRange(0, field.value.length);
@@ -244,34 +297,62 @@ document.addEventListener("DOMContentLoaded", function () {
             document.body.removeChild(a);
         }
     });
-    document.getElementById("informations").addEventListener("click", function () {
-        alert("Verzija: " + app.getVersion() + "\n" +
-            "Kodno ime: " + app.getCodeName() + "\n" +
-            "Datum izgradnje: " + app.getBuildDate() + "\n");
-    });
+    /**
+     * Dodavanje podešavanja u registar podešavanja.
+     */
     var likesSetting = new Setting()
         .setElement(document.getElementById("likes-setting"))
         .setSettingName("like_tracker")
-        .setMessageOnTurnedOn("Praćenje lajkova je uključeno.")
-        .setMessageOnTurnedOff("Praćenje lajkova je isključeno.")
+        .setMessageOnTurnedOn("Praćenje lajkova je omogućeno.")
+        .setMessageOnTurnedOff("Praćenje lajkova je onemogućeno.")
         .attachSetting();
     var giffferSetting = new Setting()
         .setElement(document.getElementById("gifffer-setting"))
         .setSettingName("gifffer")
-        .setMessageOnTurnedOn("Automatsko pauziranje GIF-ova je uključeno.")
-        .setMessageOnTurnedOff("Automatsko pauziranje GIF-ova je isključeno.")
+        .setMessageOnTurnedOn("Automatsko pauziranje GIF-ova je omogućeno.")
+        .setMessageOnTurnedOff("Automatsko pauziranje GIF-ova je onemogućeno.")
         .attachSetting();
     var ytBlockSetting = new Setting()
         .setElement(document.getElementById("yt-block-setting"))
         .setSettingName("yt_block")
-        .setMessageOnTurnedOn("Automatsko blokiranje YouTube video zapisa je uključeno.")
-        .setMessageOnTurnedOff("Automatsko blokiranje YouTube video zapisa je isključeno.")
+        .setMessageOnTurnedOn("Automatsko blokiranje YouTube video zapisa je omogućeno.")
+        .setMessageOnTurnedOff("Automatsko blokiranje YouTube video zapisa je onemogućeno.")
         .attachSetting();
     var autoFillSetting = new Setting()
         .setElement(document.getElementById("auto-fill-setting"))
         .setSettingName("auto_fill")
-        .setMessageOnTurnedOn("Automatsko popunjavanje postova sa manje od 10 slova je uključeno.")
-        .setMessageOnTurnedOff("Automatsko popunjavanje postova sa manje od 10 slova je isključeno.")
+        .setMessageOnTurnedOn("Automatsko popunjavanje postova sa manje od 10 slova je omogućeno.")
+        .setMessageOnTurnedOff("Automatsko popunjavanje postova sa manje od 10 slova je onemogućeno.")
+        .attachSetting();
+    var postHTMLSetting = new Setting()
+        .setElement(document.getElementById("post-html-setting"))
+        .setSettingName("post_html")
+        .setMessageOnTurnedOn("Automatsko uključivanje HTML-a u porukama je omogućeno.")
+        .setMessageOnTurnedOff("Automatsko uključivanje HTML-a u porukama je onemogućeno.")
+        .attachSetting();
+    var postBBCodeSetting = new Setting()
+        .setElement(document.getElementById("post-bbcode-setting"))
+        .setSettingName("post_bbcode")
+        .setMessageOnTurnedOn("Automatsko uključivanje BB koda u poruci je omogućeno.")
+        .setMessageOnTurnedOff("Automatsko uključivanje BB koda u poruci je onemogućeno.")
+        .attachSetting();
+    var postSmiliesSetting = new Setting()
+        .setElement(document.getElementById("post-smilies-setting"))
+        .setSettingName("post_smilies")
+        .setMessageOnTurnedOn("Automatsko uključivanje smajlija u poruci je omogućeno.")
+        .setMessageOnTurnedOff("Automatsko uključivanje smajlija u poruci je onemogućeno.")
+        .attachSetting();
+    var postSignatureSetting = new Setting()
+        .setElement(document.getElementById("post-signature-setting"))
+        .setSettingName("post_signature")
+        .setMessageOnTurnedOn("Automatsko kačenje potpisa je omogućeno.")
+        .setMessageOnTurnedOff("Automatsko kačenje potpisa je onemogućeno.")
+        .attachSetting();
+    var postEmailSetting = new Setting()
+        .setElement(document.getElementById("post-email-setting"))
+        .setSettingName("post_email")
+        .setMessageOnTurnedOn("Automatsko obaveštavanje na email kada neko odgovori je omogućeno.")
+        .setMessageOnTurnedOff("Automatsko obaveštavanje na email kada neko odgovori je onemogućeno.")
         .attachSetting();
     var disableApplyDataButton = function () {
         document.getElementById("apply-data-json").setAttribute("disabled", "disabled");
@@ -279,6 +360,9 @@ document.addEventListener("DOMContentLoaded", function () {
     var enableApplyDataButton = function () {
         document.getElementById("apply-data-json").removeAttribute("disabled");
     };
+    /**
+     * Uvoz podataka.
+     */
     document.getElementById("import-data-json-file").addEventListener("change", function () {
         disableApplyDataButton();
         if (!(File && FileReader && FileList && Blob)) {
@@ -300,6 +384,9 @@ document.addEventListener("DOMContentLoaded", function () {
         };
         reader.readAsText(file);
     });
+    /**
+     * Dodavanje uvezenih podataka u proširenje.
+     */
     document.getElementById("apply-data-json").addEventListener("click", function () {
         disableApplyDataButton();
         var data = document.getElementById("import-data-json").value;
