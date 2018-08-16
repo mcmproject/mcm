@@ -1,8 +1,18 @@
 /// <reference types="chrome"/>
 "use strict";
-var version = "1.3.0";
-var codeName = "Skoplje";
-var buildDate = "05.08.2018.";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var version = "1.4.0";
+var codeName = "Tirana";
+var buildDate = "16.08.2018.";
 var storage = chrome.storage.local;
 var MCM = (function () {
     function MCM() {
@@ -28,65 +38,28 @@ var MCM = (function () {
             ErrorNotification.notLike();
         }
     };
+    MCM.addSavedPost = function (post) {
+        if (post instanceof SavedPost) {
+            if (post.isValid()) {
+                storage.get("mcm-saved-posts", function (result) {
+                    var savedPosts = result["mcm-saved-posts"];
+                    savedPosts[post.id] = post["export"]();
+                    storage.set({ "mcm-saved-posts": savedPosts }, function () {
+                        if (chrome.runtime.lastError) {
+                            ErrorNotification.errorOnAddingSavedPost(chrome.runtime.lastError);
+                        }
+                    });
+                });
+            }
+            else {
+                ErrorNotification.invalidSavedPost();
+            }
+        }
+        else {
+            ErrorNotification.notSavedPost();
+        }
+    };
     return MCM;
-}());
-var Like = (function () {
-    function Like() {
-        this.id = null;
-        this.author = null;
-        this.link = null;
-        this.time = null;
-        this.date = null;
-        this.valid = true;
-    }
-    Like.prototype.setId = function (id) {
-        this.id = id;
-        return this;
-    };
-    Like.prototype.setAuthor = function (author) {
-        this.author = author;
-        return this;
-    };
-    Like.prototype.setLink = function (link) {
-        this.link = link;
-        return this;
-    };
-    Like.prototype.setTime = function (time) {
-        this.time = time;
-        return this;
-    };
-    Like.prototype.setDate = function (date) {
-        this.date = date;
-        return this;
-    };
-    Like.prototype.isValid = function () {
-        if (typeof this.id !== "string" || !this.id.length) {
-            this.valid = false;
-        }
-        if (typeof this.author !== "string" || !this.author.length) {
-            this.valid = false;
-        }
-        if (typeof this.link !== "string" || !this.link.length) {
-            this.valid = false;
-        }
-        if (typeof this.time !== "string" || !this.time.length) {
-            this.valid = false;
-        }
-        if (typeof this.date !== "string" || !this.date.length) {
-            this.valid = false;
-        }
-        return this.valid;
-    };
-    Like.prototype["export"] = function () {
-        return {
-            "id": this.id,
-            "author": this.author,
-            "link": this.link,
-            "time": this.time,
-            "date": this.date
-        };
-    };
-    return Like;
 }());
 var DateTime = (function () {
     function DateTime() {
@@ -120,10 +93,87 @@ var ErrorNotification = (function () {
         console.log(error);
         throw new Error("Došlo je do greške pri dodavanju lajka.");
     };
+    ErrorNotification.notSavedPost = function () {
+        throw new Error("Poslati parametar nije 'SavedPost' objekat.");
+    };
+    ErrorNotification.invalidSavedPost = function () {
+        throw new Error("Poslati parametar nije validan 'SavedPost' objekat.");
+    };
+    ErrorNotification.errorOnAddingSavedPost = function (error) {
+        alert("Došlo je do greške pri dodavanju poruke u sačuvane poruke!");
+        console.log(error);
+        throw new Error("Došlo je do greške pri dodavanju poruke u sačuvane poruke.");
+    };
     return ErrorNotification;
 }());
+var Post = (function () {
+    function Post() {
+        this.author = null;
+        this.link = null;
+        this.valid = true;
+    }
+    Post.prototype.setAuthor = function (author) {
+        this.author = author;
+        return this;
+    };
+    Post.prototype.setLink = function (link) {
+        this.link = link;
+        return this;
+    };
+    Post.prototype.isValid = function () {
+        if (typeof this.author !== "string" || !this.author.length) {
+            this.valid = false;
+        }
+        if (typeof this.link !== "string" || !this.link.length) {
+            this.valid = false;
+        }
+        return this.valid;
+    };
+    Post.prototype["export"] = function () {
+        var time = new DateTime().getCurrentTime();
+        var date = new DateTime().getCurrentDate();
+        return {
+            "author": this.author,
+            "link": this.link,
+            "time": time,
+            "date": date
+        };
+    };
+    return Post;
+}());
+var Like = (function (_super) {
+    __extends(Like, _super);
+    function Like() {
+        return _super !== null && _super.apply(this, arguments) || this;
+    }
+    return Like;
+}(Post));
+var SavedPost = (function (_super) {
+    __extends(SavedPost, _super);
+    function SavedPost() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.id = null;
+        return _this;
+    }
+    SavedPost.prototype.setId = function (id) {
+        this.id = id;
+        return this;
+    };
+    return SavedPost;
+}(Post));
 document.addEventListener("DOMContentLoaded", function () {
     var url = window.location.href;
+    var mcm_settings = {
+        "like_tracker": true,
+        "gifffer": false,
+        "yt_block": false,
+        "auto_fill": false,
+        "post_html": false,
+        "post_bbcode": true,
+        "post_smilies": true,
+        "post_signature": true,
+        "post_email": false
+    };
     storage.get("mcm", function (result) {
         var results = result.mcm;
         if (results === undefined) {
@@ -133,17 +183,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 "buildDate": buildDate
             };
             var mcm_likes = [];
-            var mcm_settings = {
-                "like_tracker": true,
-                "gifffer": false,
-                "yt_block": false,
-                "auto_fill": false,
-                "post_html": false,
-                "post_bbcode": true,
-                "post_smilies": true,
-                "post_signature": true,
-                "post_email": false
-            };
+            var mcm_saved_posts = {};
             storage.set({ "mcm": mcm }, function () {
                 if (chrome.runtime.lastError) {
                     ErrorNotification.extensionInitError(chrome.runtime.lastError);
@@ -155,6 +195,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     ErrorNotification.extensionInitError(chrome.runtime.lastError);
                 }
                 console.log("Skladište za praćenje lajkova je dodato.");
+            });
+            storage.set({ "mcm-saved-posts": mcm_saved_posts }, function () {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Skladište za sačuvane poruke je dodato.");
             });
             storage.set({ "mcm-settings": mcm_settings }, function () {
                 if (chrome.runtime.lastError) {
@@ -171,33 +217,11 @@ document.addEventListener("DOMContentLoaded", function () {
             storage.get("mcm-settings", function (result) {
                 var settings = result["mcm-settings"];
                 var updateSettings = false;
-                if (settings["yt_block"] === undefined) {
-                    settings["yt_block"] = false;
-                    updateSettings = true;
-                }
-                if (settings["auto_fill"] === undefined) {
-                    settings["auto_fill"] = false;
-                    updateSettings = true;
-                }
-                if (settings["post_html"] === undefined) {
-                    settings["post_html"] = false;
-                    updateSettings = true;
-                }
-                if (settings["post_bbcode"] === undefined) {
-                    settings["post_bbcode"] = true;
-                    updateSettings = true;
-                }
-                if (settings["post_smilies"] === undefined) {
-                    settings["post_smilies"] = true;
-                    updateSettings = true;
-                }
-                if (settings["post_signature"] === undefined) {
-                    settings["post_signature"] = true;
-                    updateSettings = true;
-                }
-                if (settings["post_email"] === undefined) {
-                    settings["post_email"] = false;
-                    updateSettings = true;
+                for (var setting in mcm_settings) {
+                    if (mcm_settings.hasOwnProperty(setting) && mcm_settings[setting] === undefined) {
+                        settings[setting] = mcm_settings[setting];
+                        updateSettings = true;
+                    }
                 }
                 if (updateSettings) {
                     storage.set({ "mcm-settings": settings }, function () {
@@ -206,22 +230,31 @@ document.addEventListener("DOMContentLoaded", function () {
                         }
                     });
                 }
+                storage.get("mcm-saved-posts", function (result) {
+                    var savedPosts = result["mcm-saved-posts"];
+                    if (savedPosts === undefined) {
+                        storage.set({ "mcm-saved-posts": {} }, function () {
+                            if (chrome.runtime.lastError) {
+                                ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                            }
+                            console.log("Skladište za sačuvane poruke je dodato.");
+                        });
+                    }
+                });
                 var like_tracker = settings["like_tracker"];
                 if (like_tracker) {
-                    if (document.getElementsByClassName("lajk").length) {
-                        var likes_1 = document.getElementsByClassName("lajk");
+                    if (document.querySelectorAll(".lajk").length) {
+                        var likes_1 = document.querySelectorAll(".lajk");
                         var _loop_1 = function (i) {
-                            likes_1[i].addEventListener("click", function () {
-                                var href = likes_1[i].getAttribute("href");
+                            likes_1.item(i).addEventListener("click", function () {
+                                var href = likes_1.item(i).getAttribute("href");
                                 var id = href.split(",")[1].slice(1, href.split(",")[1].length - 1);
                                 var link = url.split("#")[0] + "#p" + id;
-                                var author = document.getElementById("tabela_poruke_" + id)
-                                    .getElementsByClassName("profile")[0].getAttribute("href")
+                                var author = document.querySelector("#tabela_poruke_" + id)
+                                    .querySelectorAll(".profile").item(0).getAttribute("href")
                                     .split("/")[4];
-                                var time = new DateTime().getCurrentTime();
-                                var date = new DateTime().getCurrentDate();
                                 var like = new Like();
-                                like.setId(id).setAuthor(author).setLink(link).setTime(time).setDate(date);
+                                like.setAuthor(author).setLink(link);
                                 MCM.addLike(like);
                             });
                         };
@@ -229,6 +262,47 @@ document.addEventListener("DOMContentLoaded", function () {
                             _loop_1(i);
                         }
                     }
+                }
+                var savedPosts = null;
+                if (document.querySelector("#topictablebody")) {
+                    chrome.storage.local.get("mcm-saved-posts", function (result) {
+                        if (chrome.runtime.lastError) {
+                            ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                        }
+                        savedPosts = result["mcm-saved-posts"];
+                        var currentUrl = window.location;
+                        var socialButtonsList = document.querySelectorAll(".socials");
+                        var usernameSections = document.querySelectorAll(".name");
+                        var links = Array.from(document.querySelectorAll("a.nick_white"))
+                            .filter(function (link) { return link.getAttribute("href") !== "#content"; });
+                        var _loop_2 = function (i) {
+                            var id = links[i].getAttribute("href").substr(2);
+                            if (!savedPosts[id]) {
+                                var text = document.createTextNode("Sačuvaj poruku");
+                                var a = document.createElement("a");
+                                var li = document.createElement("li");
+                                var ul_1 = socialButtonsList.item(i);
+                                a.addEventListener("click", function (e) {
+                                    e.preventDefault();
+                                    var link = currentUrl.toString().split("#")[0] + "#p" + id;
+                                    var author = usernameSections.item(i).childNodes.item(0).nodeValue;
+                                    var savedPost = new SavedPost();
+                                    savedPost.setId(id).setAuthor(author).setLink(link);
+                                    MCM.addSavedPost(savedPost);
+                                    ul_1.removeChild(ul_1.childNodes.item(ul_1.childNodes.length - 1));
+                                });
+                                a.appendChild(text);
+                                a.style.padding = "0 4px 0 4px";
+                                a.setAttribute("href", "#");
+                                li.appendChild(a);
+                                li.style.borderRadius = "2px";
+                                ul_1.appendChild(li);
+                            }
+                        };
+                        for (var i = 0; i < socialButtonsList.length; i++) {
+                            _loop_2(i);
+                        }
+                    });
                 }
             });
         }

@@ -35,7 +35,7 @@ a:focus {
     padding-right: 20px !important;
 }
 
-#table-wrapper {
+.table-wrapper {
     height: 400px !important;
     overflow: auto !important;
 }

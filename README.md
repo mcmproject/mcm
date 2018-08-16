@@ -6,11 +6,10 @@ https://mcmproject.github.io
 
 ## Trenutna verzija
 
-*1.3.0 Skoplje*
+*1.4.0 Tirana*
 
-- Dugme *Nova sesija* preimenovano u *Obriši podatke*
-- Uklonjeno dugme *Informacije* i prebačeno u novi tab ispod podešavanja
-- Omogućeno automatsko uključivanje / isključivanje opcija pri pisanju poruka
+- Dodata mogućnost čuvanja poruka
+- Dodat prozor sa opcijama za brisanje podataka
 
 ## Prioriteti
 

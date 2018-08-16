@@ -18,6 +18,14 @@ chrome.storage.local.get("mcm-settings", function(result) {
     var postSignature = settings["post_signature"];
     var postEmail = settings["post_email"];
 
+    var escapeRegExp = function(text) {
+        return text.replace(/[-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, "\$&");
+    }
+
+    var replaceAll = function(text, search, replacement) {
+        return text.replace(new RegExp(escapeRegExp(search), /g/), escapeRegExp(replacement));
+    }
+
     window.onload = function() {
         if (gifffer) {
             var images = document.getElementsByTagName("img");

@@ -1,7 +1,7 @@
 let app = (() => {
-    let version   = "1.3.0",
-        codeName  = "Skoplje",
-        buildDate = "05.08.2018.",
+    let version   = "1.4.0",
+        codeName  = "Tirana",
+        buildDate = "16.08.2018.",
 
         api = {
             getVersion() {
@@ -57,7 +57,7 @@ class Setting {
 
         document.getElementById(this.element.id).addEventListener("click", () => {
             if (!this.element.checked) {
-                chrome.storage.local.get("mcm-settings", (result) => {
+                chrome.storage.local.get("mcm-settings", result => {
                     let settings = result["mcm-settings"];
                     settings[this.settingName] = false;
                     chrome.storage.local.set({"mcm-settings": settings}, () => {
@@ -70,7 +70,7 @@ class Setting {
                     });
                 });
             } else {
-                chrome.storage.local.get("mcm-settings", (result) => {
+                chrome.storage.local.get("mcm-settings", result => {
                     let settings = result["mcm-settings"];
                     settings[this.settingName] = true;
                     chrome.storage.local.set({"mcm-settings": settings}, () => {
@@ -85,7 +85,7 @@ class Setting {
             }
         });
 
-        chrome.storage.local.get("mcm-settings", (result) => {
+        chrome.storage.local.get("mcm-settings", result => {
             let settings = result["mcm-settings"];
             this.element.checked = (settings[this.settingName]) ? true : false;
         });
@@ -105,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Prikazivanje informacija o proširenju.
      */
-
     let mcmVersionField = document.getElementById("mcm-version");
     let mcmVersionText = document.createTextNode(app.getVersion());
     mcmVersionField.appendChild(mcmVersionText);
@@ -121,8 +120,19 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Učitavanje podešavanja proširenja.
      */
+    let mcm_settings = {
+        "like_tracker": true,
+        "gifffer": false,
+        "yt_block": false,
+        "auto_fill": false,
+        "post_html": false,
+        "post_bbcode": true,
+        "post_smilies": true,
+        "post_signature": true,
+        "post_email": false
+    };
 
-    chrome.storage.local.get("mcm", (result) => {
+    chrome.storage.local.get("mcm", result => {
         let results = result.mcm;
         if (results === undefined) {
             let mcm = {
@@ -133,18 +143,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let mcm_likes = [];
 
-            let mcm_settings = {
-                "like_tracker": true,
-                "gifffer": false,
-                "yt_block": false,
-                "auto_fill": false,
-                "post_html": false,
-                "post_bbcode": true,
-                "post_smilies": true,
-                "post_signature": true,
-                "post_email": false
-            };
-        
+            let mcm_saved_posts = {};
+
             chrome.storage.local.set({"mcm": mcm}, () => {
                 if (chrome.runtime.lastError) {
                     ErrorNotification.extensionInitError(chrome.runtime.lastError);
@@ -157,6 +157,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     ErrorNotification.extensionInitError(chrome.runtime.lastError);
                 }
                 console.log("Skladište za praćenje lajkova je dodato.");
+            });
+
+            chrome.storage.local.set({"mcm-saved-posts": mcm_saved_posts}, () => {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Skladište za sačuvane poruke je dodato.");
             });
         
             chrome.storage.local.set({"mcm-settings": mcm_settings}, () => {
@@ -173,43 +180,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 window.location.reload();
             });
         } else {
-            chrome.storage.local.get("mcm-settings", (result) => {
+            chrome.storage.local.get("mcm-settings", result => {
                 let settings = result["mcm-settings"];
                 let updateSettings = false;
 
-                if (settings["yt_block"] === undefined) {
-                    settings["yt_block"] = false;
-                    updateSettings = true;
-                }
-
-                if (settings["auto_fill"] === undefined) {
-                    settings["auto_fill"] = false;
-                    updateSettings = true;
-                }
-
-                if (settings["post_html"] === undefined) {
-                    settings["post_html"] = false;
-                    updateSettings = true;
-                }
-
-                if (settings["post_bbcode"] === undefined) {
-                    settings["post_bbcode"] = true;
-                    updateSettings = true;
-                }
-
-                if (settings["post_smilies"] === undefined) {
-                    settings["post_smilies"] = true;
-                    updateSettings = true;
-                }
-
-                if (settings["post_signature"] === undefined) {
-                    settings["post_signature"] = true;
-                    updateSettings = true;
-                }
-
-                if (settings["post_email"] === undefined) {
-                    settings["post_email"] = false;
-                    updateSettings = true;
+                for (let setting in mcm_settings) {
+                    if (mcm_settings.hasOwnProperty(setting) && mcm_settings[setting] === undefined) {
+                        settings[setting] = mcm_settings[setting];
+                        updateSettings = true;
+                    }
                 }
 
                 if (updateSettings) {
@@ -219,11 +198,24 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     });
                 }
+
+                storage.get("mcm-saved-posts", result => {
+                    let savedPosts = result["mcm-saved-posts"];
+                    if (savedPosts === undefined) {
+                        storage.set({"mcm-saved-posts": {}}, () => {
+                            if (chrome.runtime.lastError) {
+                                ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                            }
+                            console.log("Skladište za sačuvane poruke je dodato.");
+                        });
+                    }
+                });
             });
         }
     });
 
-    let likes = null;
+    let likes: any[] = null;
+    let savedPosts: Object = null;
     let dataForExport = null;
 
     let escapeHTML = (str) => { 
@@ -233,12 +225,11 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Učitavanje i prikazivanje lajkovanih poruka.
      */
-    
-    chrome.storage.local.get("mcm-likes", (result) => {
+    chrome.storage.local.get("mcm-likes", result => {
         likes = result["mcm-likes"];
 
         if (likes !== null) {
-            let likes_list = document.getElementById("likes-list");
+            let likes_list = document.querySelector("#likes-list");
             for (let i = likes.length-1; i >= 0; --i) {
                 let tr = document.createElement("tr");
                 let author = document.createElement("td");
@@ -264,33 +255,79 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     /**
+     * Učitavanje i prikazivanje sačuvanih poruka.
+     */
+    chrome.storage.local.get("mcm-saved-posts", result => {
+        savedPosts = result["mcm-saved-posts"];
+
+        if (savedPosts !== null) {
+            let savedPostsList = document.querySelector("#saved-posts-list");
+            for (let post in savedPosts) {
+                if (savedPosts.hasOwnProperty(post)) {
+                    let tr = document.createElement("tr");
+                    let author = document.createElement("td");
+                    let link = document.createElement("td");
+                    let a = document.createElement("a");
+                    let time = document.createElement("td");
+                    let date = document.createElement("td");
+
+                    author.innerHTML = escapeHTML(savedPosts[post]["author"]);
+                    time.innerHTML = escapeHTML(savedPosts[post]["time"]);
+                    date.innerHTML = escapeHTML(savedPosts[post]["date"]);
+
+                    tr.appendChild(author);
+                    a.innerText = savedPosts[post]["link"];
+                    a.href = savedPosts[post]["link"];
+                    link.appendChild(a);
+                    tr.appendChild(link);
+                    tr.appendChild(time);
+                    tr.appendChild(date);
+                    savedPostsList.appendChild(tr);
+                }
+            }
+        }
+    });
+
+    /**
      * Opcija za brisanje podataka.
      */
 
-    document.getElementById("delete").addEventListener("click", () => {
-        let choice = confirm("Da li ste sigurni da želite da obrišete podatke? Ova opcija će " +
-                             "obrisati sve do sada zabeležene podatke (podešavanja se ne brišu).");
-        if (choice) {
+    document.getElementById("delete-data-button").addEventListener("click", () => {
+        let deleteLikes: HTMLInputElement = <HTMLInputElement>document.querySelector("#delete-likes");
+        let deleteSavedPosts: HTMLInputElement = <HTMLInputElement>document.querySelector("#delete-saved-posts");
+
+        if (deleteLikes.checked) {
             chrome.storage.local.set({"mcm-likes": []}, () => {
                 if (chrome.runtime.lastError) {
                     alert("Došlo je do greške pri brisanju podataka!");
                     console.log(chrome.runtime.lastError);
                     throw new Error("Došlo je do greške pri brisanju podataka.");
                 }
+                if (!deleteSavedPosts.checked) window.location.reload();
             });
-            window.location.reload();
+        }
+
+        if (deleteSavedPosts.checked) {
+            chrome.storage.local.set({"mcm-saved-posts": {}}, () => {
+                if (chrome.runtime.lastError) {
+                    alert("Došlo je do greške pri brisanju podataka!");
+                    console.log(chrome.runtime.lastError);
+                    throw new Error("Došlo je do greške pri brisanju podataka.");
+                }
+                window.location.reload();
+            });
         }
     });
 
     /**
      * Opcija za izvoz podataka.
      */
-
     document.getElementById("export").addEventListener("click", () => {
         let likes = null;
+        let savedPosts = null;
         let settings = null;
 
-        chrome.storage.local.get("mcm-likes", (result) => {
+        chrome.storage.local.get("mcm-likes", result => {
             if (chrome.runtime.lastError) {
                 console.log(chrome.runtime.lastError);
                 throw new Error(String(chrome.runtime.lastError));
@@ -299,16 +336,26 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        chrome.storage.local.get("mcm-settings", (result) => {
+        chrome.storage.local.get("mcm-saved-posts", result => {
             if (chrome.runtime.lastError) {
                 console.log(chrome.runtime.lastError);
                 throw new Error(String(chrome.runtime.lastError));
             } else {
-                if (likes.length) {
+                savedPosts = result["mcm-saved-posts"];
+            }
+        });
+
+        chrome.storage.local.get("mcm-settings", result => {
+            if (chrome.runtime.lastError) {
+                console.log(chrome.runtime.lastError);
+                throw new Error(String(chrome.runtime.lastError));
+            } else {
+                if (likes.length || savedPosts.length) {
                     settings = result["mcm-settings"];
 
                     dataForExport = JSON.stringify({
                         "mcm-likes": likes,
+                        "mcm-saved-posts": savedPosts,
                         "mcm-settings": settings
                     });
 
@@ -320,10 +367,6 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
-
-    /**
-     * Opcija za izvoz podataka.
-     */
 
     document.getElementById("export-data-json").addEventListener("click", () => {
         let field = (<HTMLInputElement>document.getElementById("export-data-json"));
@@ -347,7 +390,6 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Dodavanje podešavanja u registar podešavanja.
      */
-
     let likesSetting = new Setting()
     .setElement(<HTMLInputElement>document.getElementById("likes-setting"))
     .setSettingName("like_tracker")
@@ -422,7 +464,6 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Uvoz podataka.
      */
-
     document.getElementById("import-data-json-file").addEventListener("change", function() {
         disableApplyDataButton();
 
@@ -454,7 +495,6 @@ document.addEventListener("DOMContentLoaded", () => {
     /**
      * Dodavanje uvezenih podataka u proširenje.
      */
-
     document.getElementById("apply-data-json").addEventListener("click", function() {
 
         disableApplyDataButton();
@@ -474,14 +514,13 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
             let likes = [];
 
-            chrome.storage.local.get("mcm-likes", (result) => {
+            chrome.storage.local.get("mcm-likes", result => {
                 likes = result["mcm-likes"];
             });
 
             for (let i = 0; i < data["mcm-likes"].length; i++) {
                 let like = data["mcm-likes"][i];
                 likes.push({
-                    "id": like["id"],
                     "author": like["author"],
                     "link": like["link"],
                     "time": like["time"],
@@ -496,6 +535,17 @@ document.addEventListener("DOMContentLoaded", () => {
                     throw new Error("Došlo je do greške pri izmeni podataka.");
                 }
                 console.log("Podaci o lajkovima su uvezeni.");
+
+                if (data["mcm-saved-posts"] && typeof data["mcm-saved-posts"] === "object") {
+                    chrome.storage.local.set({"mcm-saved-posts": data["mcm-saved-posts"]}, () => {
+                        if (chrome.runtime.lastError) {
+                            alert("Došlo je do greške pri izmeni podataka!");
+                            console.log(chrome.runtime.lastError);
+                            throw new Error("Došlo je do greške pri izmeni podataka.");
+                        }
+                        console.log("Podaci o sačuvanim porukama su uvezeni.");
+                    });
+                }
                 
                 if (importSettings) {
                     if (data["mcm-settings"] === undefined) {

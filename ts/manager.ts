@@ -2,11 +2,15 @@
 
 "use strict";
 
-const version = "1.3.0";
-const codeName = "Skoplje";
-const buildDate = "05.08.2018.";
+const version = "1.4.0";
+const codeName = "Tirana";
+const buildDate = "16.08.2018.";
 
 let storage = chrome.storage.local;
+
+interface ArrayConstructor {
+    from(arrayLike: any, mapFn?, thisArg?): Array<any>;
+}
 
 class MCM {
     static addLike(like: Like) {
@@ -28,72 +32,24 @@ class MCM {
             ErrorNotification.notLike();
         }
     }
-}
 
-class Like {
-    id: string     = null;
-    author: string = null;
-    link: string   = null;
-    time: string   = null;
-    date: string   = null;
-    valid: boolean = true;
-
-    setId(id: string) {
-        this.id = id;
-        return this;
-    }
-
-    setAuthor(author: string) {
-        this.author = author;
-        return this;
-    }
-
-    setLink(link: string) {
-        this.link = link;
-        return this;
-    }
-
-    setTime(time: string) {
-        this.time = time;
-        return this;
-    }
-
-    setDate(date: string) {
-        this.date = date;
-        return this;
-    }
-
-    isValid() {
-        if (typeof this.id !== "string" || !this.id.length) {
-            this.valid = false;
-        }
-
-        if (typeof this.author !== "string" || !this.author.length) {
-            this.valid = false;
-        }
-
-        if (typeof this.link !== "string" || !this.link.length) {
-            this.valid = false;
-        }
-
-        if (typeof this.time !== "string" || !this.time.length) {
-            this.valid = false;
-        }
-
-        if (typeof this.date !== "string" || !this.date.length) {
-            this.valid = false;
-        }
-
-        return this.valid;
-    }
-
-    export() {
-        return {
-            "id": this.id,
-            "author": this.author,
-            "link": this.link,
-            "time": this.time,
-            "date": this.date
+    static addSavedPost(post: SavedPost) {
+        if (post instanceof SavedPost) {
+            if (post.isValid()) {
+                storage.get("mcm-saved-posts", result => {
+                    let savedPosts = result["mcm-saved-posts"];
+                    savedPosts[post.id] = post.export();
+                    storage.set({"mcm-saved-posts": savedPosts}, () => {
+                        if (chrome.runtime.lastError) {
+                            ErrorNotification.errorOnAddingSavedPost(chrome.runtime.lastError);
+                        }
+                    });
+                });
+            } else {
+                ErrorNotification.invalidSavedPost();
+            }
+        } else {
+            ErrorNotification.notSavedPost();
         }
     }
 }
@@ -130,12 +86,89 @@ class ErrorNotification {
         console.log(error);
         throw new Error("Došlo je do greške pri dodavanju lajka.");
     }
+
+    static notSavedPost() {
+        throw new Error("Poslati parametar nije 'SavedPost' objekat.");
+    }
+
+    static invalidSavedPost() {
+        throw new Error("Poslati parametar nije validan 'SavedPost' objekat.");
+    }
+
+    static errorOnAddingSavedPost(error) {
+        alert("Došlo je do greške pri dodavanju poruke u sačuvane poruke!");
+        console.log(error);
+        throw new Error("Došlo je do greške pri dodavanju poruke u sačuvane poruke.");
+    }
+}
+
+class Post {
+    author: string = null;
+    link: string   = null;
+    valid: boolean = true;
+
+    setAuthor(author: string) {
+        this.author = author;
+        return this;
+    }
+
+    setLink(link: string) {
+        this.link = link;
+        return this;
+    }
+
+    isValid() {
+        if (typeof this.author !== "string" || !this.author.length) {
+            this.valid = false;
+        }
+
+        if (typeof this.link !== "string" || !this.link.length) {
+            this.valid = false;
+        }
+
+        return this.valid;
+    }
+
+    export() {
+        let time = new DateTime().getCurrentTime();
+        let date = new DateTime().getCurrentDate();
+
+        return {
+            "author": this.author,
+            "link": this.link,
+            "time": time,
+            "date": date
+        }
+    }
+}
+
+class Like extends Post { }
+
+class SavedPost extends Post {
+    id: string = null;
+
+    setId(id: string) {
+        this.id = id;
+        return this;
+    }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     let url = window.location.href;
 
-    storage.get("mcm", (result) => {
+    let mcm_settings = {
+        "like_tracker": true,
+        "gifffer": false,
+        "yt_block": false,
+        "auto_fill": false,
+        "post_html": false,
+        "post_bbcode": true,
+        "post_smilies": true,
+        "post_signature": true,
+        "post_email": false
+    };
+
+    storage.get("mcm", result => {
         let results = result.mcm;
         if (results === undefined) {
             let mcm = {
@@ -143,84 +176,53 @@ document.addEventListener("DOMContentLoaded", () => {
                 "codeName": codeName,
                 "buildDate": buildDate
             };
-        
+
             let mcm_likes = [];
-        
-            let mcm_settings = {
-                "like_tracker": true,
-                "gifffer": false,
-                "yt_block": false,
-                "auto_fill": false,
-                "post_html": false,
-                "post_bbcode": true,
-                "post_smilies": true,
-                "post_signature": true,
-                "post_email": false
-            };
-        
+
+            let mcm_saved_posts = {};
+
             storage.set({"mcm": mcm}, () => {
                 if (chrome.runtime.lastError) {
                     ErrorNotification.extensionInitError(chrome.runtime.lastError);
                 }
                 console.log("Opšti podaci o proširenju su dodati.");
             });
-        
+
             storage.set({"mcm-likes": mcm_likes}, () => {
                 if (chrome.runtime.lastError) {
                     ErrorNotification.extensionInitError(chrome.runtime.lastError);
                 }
                 console.log("Skladište za praćenje lajkova je dodato.");
             });
-        
+
+            storage.set({"mcm-saved-posts": mcm_saved_posts}, () => {
+                if (chrome.runtime.lastError) {
+                    ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                }
+                console.log("Skladište za sačuvane poruke je dodato.");
+            });
+
             storage.set({"mcm-settings": mcm_settings}, () => {
                 if (chrome.runtime.lastError) {
                     ErrorNotification.extensionInitError(chrome.runtime.lastError);
                 }
                 console.log("Podešavanja proširenja su dodata.");
-        
+
                 alert("Čestitamo, proširenje je uspešno podešeno! " +
                       "Za pristup podešavanjima i ostalim opcijama " +
                       "proširenja kliknite na ikonicu proširenja " +
                       "koja se nalazi pored polja za kucanje URL-a.");
             });
         } else {
-            storage.get("mcm-settings", (result) => {
+            storage.get("mcm-settings", result => {
                 let settings = result["mcm-settings"];
                 let updateSettings = false;
 
-                if (settings["yt_block"] === undefined) {
-                    settings["yt_block"] = false;
-                    updateSettings = true;
-                }
-
-                if (settings["auto_fill"] === undefined) {
-                    settings["auto_fill"] = false;
-                    updateSettings = true;
-                }
-
-                if (settings["post_html"] === undefined) {
-                    settings["post_html"] = false;
-                    updateSettings = true;
-                }
-
-                if (settings["post_bbcode"] === undefined) {
-                    settings["post_bbcode"] = true;
-                    updateSettings = true;
-                }
-
-                if (settings["post_smilies"] === undefined) {
-                    settings["post_smilies"] = true;
-                    updateSettings = true;
-                }
-
-                if (settings["post_signature"] === undefined) {
-                    settings["post_signature"] = true;
-                    updateSettings = true;
-                }
-
-                if (settings["post_email"] === undefined) {
-                    settings["post_email"] = false;
-                    updateSettings = true;
+                for (let setting in mcm_settings) {
+                    if (mcm_settings.hasOwnProperty(setting) && mcm_settings[setting] === undefined) {
+                        settings[setting] = mcm_settings[setting];
+                        updateSettings = true;
+                    }
                 }
 
                 if (updateSettings) {
@@ -231,29 +233,83 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 }
 
+                storage.get("mcm-saved-posts", result => {
+                    let savedPosts = result["mcm-saved-posts"];
+                    if (savedPosts === undefined) {
+                        storage.set({"mcm-saved-posts": {}}, () => {
+                            if (chrome.runtime.lastError) {
+                                ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                            }
+                            console.log("Skladište za sačuvane poruke je dodato.");
+                        });
+                    }
+                });
+
                 let like_tracker = settings["like_tracker"];
                 if (like_tracker) {
-                    if (document.getElementsByClassName("lajk").length) {
-                        let likes = document.getElementsByClassName("lajk");
-            
+                    if (document.querySelectorAll(".lajk").length) {
+                        let likes = document.querySelectorAll(".lajk");
+
                         for (let i = 0; i < likes.length; i++) {
-                            likes[i].addEventListener("click", () => {
-                                let href = likes[i].getAttribute("href");
+                            likes.item(i).addEventListener("click", () => {
+                                let href = likes.item(i).getAttribute("href");
                                 let id   = href.split(",")[1].slice(1, href.split(",")[1].length - 1);
                                 let link = url.split("#")[0] + "#p" + id;
-                                let author = document.getElementById("tabela_poruke_"+id)
-                                            .getElementsByClassName("profile")[0].getAttribute("href")
+                                let author = document.querySelector("#tabela_poruke_"+id)
+                                            .querySelectorAll(".profile").item(0).getAttribute("href")
                                             .split("/")[4];
-                                    
-                                let time = new DateTime().getCurrentTime();
-                                let date = new DateTime().getCurrentDate();
-                                    
+
                                 let like = new Like();
-                                like.setId(id).setAuthor(author).setLink(link).setTime(time).setDate(date);
+                                like.setAuthor(author).setLink(link);
                                 MCM.addLike(like);
                             });
                         }
                     }
+                }
+
+                let savedPosts = null;
+                if (document.querySelector("#topictablebody")) {
+                    chrome.storage.local.get("mcm-saved-posts", result => {
+                        if (chrome.runtime.lastError) {
+                            ErrorNotification.extensionInitError(chrome.runtime.lastError);
+                        }
+                        savedPosts = result["mcm-saved-posts"];
+
+                        let currentUrl = window.location;
+                        let socialButtonsList = document.querySelectorAll(".socials");
+                        let usernameSections = document.querySelectorAll(".name");
+                        let links = Array.from(document.querySelectorAll("a.nick_white"))
+                                    .filter(link => link.getAttribute("href") !== "#content");
+
+                        for (let i = 0; i < socialButtonsList.length; i++) {
+                            let id = links[i].getAttribute("href").substr(2);
+
+                            if (!savedPosts[id]) {
+                                let text = document.createTextNode("Sačuvaj poruku");
+                                let a = document.createElement("a");
+                                let li = document.createElement("li");
+                                let ul = socialButtonsList.item(i);
+
+                                a.addEventListener("click", (e) => {
+                                    e.preventDefault();
+                                    let link = currentUrl.toString().split("#")[0] + "#p" + id;
+                                    let author = usernameSections.item(i).childNodes.item(0).nodeValue;
+
+                                    let savedPost = new SavedPost();
+                                    savedPost.setId(id).setAuthor(author).setLink(link);
+                                    MCM.addSavedPost(savedPost);
+                                    ul.removeChild(ul.childNodes.item(ul.childNodes.length-1));
+                                });
+
+                                a.appendChild(text);
+                                a.style.padding = "0 4px 0 4px";
+                                a.setAttribute("href", "#");
+                                li.appendChild(a);
+                                li.style.borderRadius = "2px";
+                                ul.appendChild(li);
+                            }
+                        }
+                    });
                 }
             });
         }

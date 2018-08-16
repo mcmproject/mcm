@@ -14,7 +14,7 @@
             <a href='#' id='export' class='btn btn-primary' data-toggle='modal' data-target='#export-data'>
                 <span class='glyphicon glyphicon-cloud-download'></span> &nbsp; Izvoz podataka
             </a>
-            <a href='#' id='delete' class='btn btn-primary'>
+            <a href='#' id='delete' class='btn btn-primary' data-toggle='modal' data-target='#delete-data'>
                 <span class='glyphicon glyphicon-trash'></span> &nbsp; Obriši podatke
             </a>
         </div>
@@ -26,6 +26,11 @@
                             <li class="list-group-item">
                                 <a data-toggle="tab" href="#likes" class="menu-items">
                                     <span class="glyphicon glyphicon-thumbs-up"></span> &nbsp; Sviđanja
+                                </a>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="tab" href="#saved-posts" class="menu-items">
+                                    <span class="glyphicon glyphicon-floppy-disk"></span> &nbsp; Sačuvane poruke
                                 </a>
                             </li>
                             <li class="list-group-item">
@@ -46,7 +51,7 @@
                 <div class="tab-content">
                     <div id="likes" class="tab-pane fade in active">
                         <h3>Sviđanja</h3>
-                        <div id="table-wrapper">
+                        <div class="table-wrapper">
                             <table id="likes-table" class="table table-striped">
                                 <thead>
                                     <tr>
@@ -61,7 +66,24 @@
                                 </tbody>
                             </table>
                         </div>
-
+                    </div>
+                    <div id="saved-posts" class="tab-pane fade">
+                        <h3>Sačuvane poruke</h3>
+                        <div class="table-wrapper">
+                            <table id="saved-posts-table" class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Autor</th>
+                                        <th>Link</th>
+                                        <th>Vreme</th>
+                                        <th>Datum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="saved-posts-list">
+                                    
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                     <div id="settings" class="tab-pane fade">
                         <h3>Podešavanja</h3>
@@ -102,7 +124,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Uvoz podataka</h4>
+                        <h4 class="modal-title">Uvezi podatke</h4>
                     </div>
                     <div class="modal-body">
                         <p>Izaberite .json fajl sa vašeg diska sa izvezenim podacima iz MyCity Manager-a klikom na
@@ -124,7 +146,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal">&times;</button>
-                        <h4 class="modal-title">Izvoz podataka</h4>
+                        <h4 class="modal-title">Izvezi podatke</h4>
                     </div>
                     <div class="modal-body">
                         <p>Kopirajte podatke iz ovog polja i sačuvajte ih kao fajl sa .json ekstenzijom ili
@@ -136,6 +158,27 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-primary" id="download-data-json">Preuzmi fajl</button>
                         <button type="button" class="btn btn-warning" data-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="delete-data" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Obriši podatke</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p><b>Napomena:</b> Jednom obrisani podaci ne mogu biti vraćeni. Ukoliko želite
+                        da sačuvate podatke pre brisanja to možete učiniti klikom na dugme <i>Izvezi podatke</i>, te praćenjem
+                        dobijenih instrukcija.</p>
+                        <input type="checkbox" id="delete-likes"/> &nbsp; Obriši zabeležena sviđanja <br/>
+                        <input type="checkbox" id="delete-saved-posts"/> &nbsp; Obriši sačuvane poruke
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-danger" id="delete-data-button">Obriši podatke</button>
+                        <button type="button" class="btn btn-warning" data-dismiss="modal">Izađi</button>
                     </div>
                 </div>
             </div>
